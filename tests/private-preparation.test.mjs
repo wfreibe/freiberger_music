@@ -53,3 +53,17 @@ test('private preparation preserves live files, imports current media and create
   assert.deepEqual(manifest(live), before);
   if (process.platform !== 'win32') assert.equal(fs.statSync(target).mode & 0o777, 0o700);
 });
+
+test('explicit migration without backup applies schema without creating backup files', t => {
+  const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'music-migration-'));
+  t.after(() => fs.rmSync(temp, { recursive: true, force: true }));
+  const env = { ...process.env, CMS_CONFIG_PATH: '', CMS_DB_PATH: path.join(temp, 'content.sqlite'), CMS_BACKUP_DIR: path.join(temp, 'backups') };
+  const php = args => spawnSync('php', args, { env, encoding: 'utf8', windowsHide: true });
+  const fixture = php(['tests/cms-fixture.php']); assert.equal(fixture.status, 0, fixture.stderr);
+  const result = php(['bin/migrate.php', '--without-backup']); assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /integrity_check=ok; foreign_key_check=0/);
+  assert.equal(fs.existsSync(env.CMS_BACKUP_DIR), false);
+  const invalid = php(['bin/migrate.php', '--unknown-option']); assert.notEqual(invalid.status, 0);
+  const inspect = php(['-r', '$d=new PDO("sqlite:".getenv("CMS_DB_PATH")); echo json_encode([$d->query("SELECT COUNT(*) FROM releases")->fetchColumn(),$d->query("SELECT COUNT(*) FROM music_schema_migrations")->fetchColumn()]);']);
+  assert.equal(inspect.status, 0, inspect.stderr); assert.deepEqual(JSON.parse(inspect.stdout), [1, 2]);
+});

@@ -141,16 +141,18 @@ Das Workflow-File alleine richtet weder Repository-Secrets noch Hosting ein.
 Die einmalige Produktionsumstellung und die Einrichtung der Environment-Werte
 erfolgen getrennt von der Veröffentlichung auf `development`.
 
-## Reguläres Deployment und Rückfall
+## Tryout-Deployment ohne zusätzliche Sicherungen
 
 Das Paket enthält ausschließlich Code und statische Medien, keine Datenbanken, Sitzungen,
-Konfiguration oder Uploads. Vor dem Einspielen werden SQLite- und Anwendungssicherungen
-erstellt. `rsync` verwendet kein `--delete`; Laufzeitverzeichnisse sind ausgeschlossen.
-Migrationen laufen explizit per CLI, niemals bei öffentlichen API-Aufrufen.
+Konfiguration oder Uploads. Auf ausdrücklichen Wunsch werden beim Deployment keine
+SQLite-, Anwendungs-, Upload- oder Sicherungen ersetzter Dateien erstellt. `rsync`
+verwendet kein `--delete`; Laufzeitverzeichnisse und die aktive Konfiguration sind
+ausgeschlossen. Migrationen laufen explizit per CLI mit `--without-backup`, niemals bei
+öffentlichen API-Aufrufen. Ein manuell gestarteter Migrationslauf ohne diese Option
+behält sein bisheriges Sicherungsverhalten.
 
-Bei einem Deployfehler: weitere Deployments stoppen und unter `.deploy/history/RELEASE/`
-die gesicherten Dateien prüfen. Die automatische Pipeline führt **keinen automatischen
-Rollback** aus. Wiederherstellung muss bewusst unter Wartung erfolgen: alte Anwendungsdateien
-aus `application.tar` übernehmen; bei Bedarf die geprüfte Datenbanksicherung mit
-`server/bin/restore.php BACKUP --maintenance` wiederherstellen, während alle Writer gestoppt
-sind. Das verwirft nach der Sicherung entstandene Änderungen und benötigt eine eigene Freigabe.
+Unter `.deploy/history/RELEASE/` wird nur der Abschluss des Deployments vermerkt;
+dort liegt keine Wiederherstellungskopie. Es gibt keinen automatischen Rollback.
+Die bisherige Legacy-Website wird bei der erstmaligen parallelen Einrichtung erhalten.
+Nach späteren Updates ohne Sicherung steht kein vom Deployment erzeugter vorheriger
+Datenstand zur Wiederherstellung zur Verfügung.

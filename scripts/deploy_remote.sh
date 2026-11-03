@@ -10,7 +10,6 @@ test -d "$base"
 test "$(readlink -f "$base")" = "$base"
 command -v flock > /dev/null
 command -v rsync > /dev/null
-command -v tar > /dev/null
 mkdir -p "$base/.deploy"
 exec 9>"$base/.deploy/deploy.lock"
 flock -w 120 9
@@ -19,7 +18,7 @@ test -f "$archive"
 printf '%s  %s\n' "$digest" "$archive" | sha256sum -c -
 stage="$base/.deploy/releases/$release"
 history="$base/.deploy/history/$release"
-# Never reuse or overwrite an earlier release or backup.
+# Never reuse or overwrite an earlier release or its completion record.
 test ! -e "$stage"
 test ! -e "$history"
 mkdir -p "$stage" "$history"
@@ -50,15 +49,10 @@ if (($c["db_path"] ?? "") !== $argv[1]."/server/data/content.sqlite" || !is_file
 $db=Database::getConnection();
 $db->query("SELECT id FROM releases LIMIT 1")->fetchAll();
 ' "$base"
-"$php" "$base/server/bin/backup.php" | tee "$history/database-backup.txt"
-if test -d "$base/server/data/uploads"; then
-  tar -cf "$history/uploads.tar" -C "$base/server/data" uploads
-fi
-# Keep a complete application snapshot; runtime data and configuration stay private in place.
-tar -cf "$history/application.tar" --exclude='server/data' --exclude='server/backups' --exclude='server/config' -C "$base" webroot server
+# Explicit tryout policy: no application, media or database backups.
 # No --delete: existing data and extra host files must remain untouched.
-rsync -rltp --chmod=D755,F644 --delay-updates --backup --backup-dir="$history/replaced-files" --exclude='/server/data/***' --exclude='/server/backups/***' --exclude='/server/config/cms_config.php' "$stage/" "$base/"
-"$php" "$base/server/bin/migrate.php"
+rsync -rltp --chmod=D755,F644 --delay-updates --exclude='/server/data/***' --exclude='/server/backups/***' --exclude='/server/config/cms_config.php' "$stage/" "$base/"
+"$php" "$base/server/bin/migrate.php" --without-backup
 "$php" -r 'require $argv[1]."/server/lib/Database.php"; Database::getConnection()->query("SELECT id FROM releases LIMIT 1");' "$base"
 printf '%s\n' "$release" > "$history/complete"
-printf 'Application updated; database, uploads and configuration retained. Backup: %s\n' "$history"
+printf 'Application updated without backups; database, uploads and configuration retained. Release record: %s\n' "$history"

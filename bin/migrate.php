@@ -6,7 +6,8 @@ require_once dirname(__DIR__) . '/lib/DatabaseMaintenance.php';
 try {
     $config = Database::getConfig();
     $path = $config['db_path'] ?? '';
-    if ($argc !== 1 || !is_string($path) || !is_file($path)) {
+    $withoutBackup = $argc === 2 && $argv[1] === '--without-backup';
+    if (($argc !== 1 && !$withoutBackup) || !is_string($path) || !is_file($path)) {
         throw new RuntimeException('Existing music database required. Import a verified copy before migration.');
     }
     $db = DatabaseMaintenance::open($path);
@@ -22,7 +23,7 @@ try {
         return !in_array((int)basename($file), $applied);
     });
     if ($pending) {
-        DatabaseMaintenance::backup($db, $config['backup_dir'] ?? '', 'pre_migration');
+        if (!$withoutBackup) DatabaseMaintenance::backup($db, $config['backup_dir'] ?? '', 'pre_migration');
         $db->beginTransaction();
         try {
             $db->exec('CREATE TABLE IF NOT EXISTS music_schema_migrations (version INTEGER PRIMARY KEY)');
