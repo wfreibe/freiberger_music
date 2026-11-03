@@ -42,3 +42,17 @@ export function redScarfMediaCopy(book: Book, language: 'de' | 'en' | 'fr') {
     fr: { songs: 'Chansons en français', audiobook: 'Livre audio en allemand', intro: 'Écoutez les chansons en français et les chapitres du livre audio en allemand publiés à ce jour.' },
   }[language];
 }
+
+export function bookFilm(book: Book): Release | null {
+  const videoId = book.film_youtube_id;
+  if (!videoId || !/^[A-Za-z0-9_-]{11}$/.test(videoId)) return null;
+  return {
+    id: -1000000000 - book.id,
+    slug: `${book.slug}-film`,
+    title: book.film_title || `${book.title} · Film`,
+    type: 'film', genre: 'Film', series_title: book.title,
+    youtube_id: videoId,
+    cover: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+    duration: book.film_duration || undefined,
+  };
+}

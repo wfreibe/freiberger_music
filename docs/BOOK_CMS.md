@@ -56,3 +56,9 @@ Der Redaktionsbereich verwendet Seitenleiste, Kopfzeile, Statusanzeige und Inhal
 Die Desktop-Vorschau rendert mit 1280 Pixeln, die Mobil-Vorschau mit 375 Pixeln (jeweils einschließlich Browser-Scrollleiste). Die Ansicht wird auf den verfügbaren Platz skaliert. Buchseiten verwenden dieselben Komponenten wie öffentlich; Musik, Kapitel, Orte und Serien zeigen die gespeicherten Inhalte mit den Website-Styles und dem vorhandenen Medien-Slider. Die Vorschau ist eine Inhaltskontrolle, die Navigation innerhalb des Rahmens ersetzt keinen öffentlichen Website-Besuch.
 
 Die Vorschau zeigt ausschließlich gespeicherte Werte. Ungespeicherte Änderungen werden markiert. Speichern lädt die Vorschau neu; „Aktualisieren“ lädt sie bei Bedarf erneut. Neue Einträge erhalten nach dem ersten Speichern eine Vorschau. Unveröffentlichte Bücher können angemeldet angesehen werden, ohne sie öffentlich freizugeben. Der Lese-Endpunkt `/api/cms/preview/{Bereich}/{ID}` erfordert die bestehende CMS-Anmeldung und liefert `Cache-Control: no-store`. Es gibt keine Datenmigration.
+
+## Film direkt abspielen
+
+Migration 106 ergänzt Filmvideo, Filmtitel und Laufzeit bei Büchern. Für die drei Ausgaben von Der rote Schal wird der am 3. November 2026 verifizierte Film `rnweaIuC_-Y` (4:27) aus der angegebenen Filmplaylist übernommen, sofern deren Link noch unverändert hinterlegt ist. Bestehende Inhaltsfelder bleiben erhalten.
+
+Unter Bücher sind **Film – YouTube-Video oder Video-Link**, **Filmtitel** und **Filmlaufzeit** pflegbar. Das Videofeld akzeptiert eine gültige YouTube-ID oder einen einzelnen YouTube-Videolink, keine Playlist. Leeres Videofeld blendet die Filmkarte aus. Die Karte öffnet den vorhandenen Player mit dem Film; die ursprüngliche Filmplaylist bleibt zusätzlich verlinkt. Der Film wird nicht als Song in den Musikkatalog eingereiht. Die CMS-Buchvorschau verwendet dieselbe Filmkarte.

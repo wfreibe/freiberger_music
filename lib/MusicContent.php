@@ -65,7 +65,7 @@ final class MusicContent
                 if ($name === 'soundtrack_source' && !in_array($value, ['series','english_book'], true)) throw new InvalidArgumentException('Ungültige Soundtrack-Quelle.');
                 if ($name === 'menu_label' && strlen($value) > 200) throw new InvalidArgumentException('Menübezeichnung ist zu lang.');
                 if ($name === 'type' && !in_array($value, ['song','audiobook','gard7','single','ep','album','chapter_audio'], true)) throw new InvalidArgumentException('Ungültiger Inhaltstyp.');
-                if ($name === 'youtube_id') {
+                if (in_array($name, ['youtube_id', 'film_youtube_id'], true)) {
                     $value = normalizeYouTubeVideoId($value);
                     if ($value === null) throw new InvalidArgumentException('Ungültiges YouTube-Video.');
                 }

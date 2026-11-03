@@ -1,4 +1,4 @@
-export type ReleaseType = 'song' | 'audiobook' | 'single' | 'ep' | 'album' | 'chapter_audio' | 'gard7';
+export type ReleaseType = 'film' | 'song' | 'audiobook' | 'single' | 'ep' | 'album' | 'chapter_audio' | 'gard7';
 
 export interface Release {
   id: number;
@@ -72,6 +72,9 @@ export interface Book {
   songs_playlist_url?: string | null;
   audiobook_playlist_url?: string | null;
   film_url?: string | null;
+  film_youtube_id?: string | null;
+  film_title?: string | null;
+  film_duration?: string | null;
   chapters?: Chapter[];
 }
 

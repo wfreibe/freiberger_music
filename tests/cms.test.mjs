@@ -89,6 +89,9 @@ test('CMS migration, secure authentication and music CRUD with isolated syntheti
   for (const {item} of scarf) {
     assert.equal(item.songs_playlist_url, 'https://www.youtube.com/playlist?list=PLZZxqjAKPSZo');
     assert.equal(item.audiobook_playlist_url, 'https://www.youtube.com/playlist?list=PLP8djEaASfxE');
+    assert.equal(item.film_youtube_id, 'rnweaIuC_-Y');
+    assert.equal(item.film_duration, '4:27');
+    assert.match(item.film_title, /Hohenlinden 1800/);
     assert.equal(item.film_url, 'https://www.youtube.com/playlist?list=PLefRR8TMnDiU');
     assert.equal(item.purchase_url, 'https://www.epubli.com/?s=Werner+Freiberger');
   }
@@ -117,9 +120,12 @@ test('CMS migration, secure authentication and music CRUD with isolated syntheti
   if (process.env.MUSIC_TEST_PACKAGE) {
     const html = await fetch(`http://127.0.0.1:${port}/the-places-that-saw-us`); assert.equal(html.status, 200); assert.match(await html.text(), /Edited English Book/);
   }
+  await request(`cms/books/${enBook.item.id}`, 'PUT', { item: {film_youtube_id:'https://example.com/watch?v=rnweaIuC_-Y'}, revision:editedBook.revision },400);
+  const withFilm = (await request(`cms/books/${enBook.item.id}`, 'PUT', {item:{film_youtube_id:'https://youtu.be/rnweaIuC_-Y'},revision:editedBook.revision})).data;
+  assert.equal(withFilm.item.film_youtube_id,'rnweaIuC_-Y');
   await request('cms/preview/unknown/1', 'GET', undefined, 404);
   await request('cms/preview/books/999999', 'GET', undefined, 404);
-  const draft = (await request(`cms/books/${enBook.item.id}`, 'PUT', { item: { is_published: 0 }, revision: editedBook.revision })).data;
+  const draft = (await request(`cms/books/${enBook.item.id}`, 'PUT', { item: { is_published: 0 }, revision: withFilm.revision })).data;
   const preview = await request(`cms/preview/books/${enBook.item.id}`);
   assert.equal(preview.data.item.title, 'Edited English Book');
   assert.equal(preview.data.item.is_published, 0);

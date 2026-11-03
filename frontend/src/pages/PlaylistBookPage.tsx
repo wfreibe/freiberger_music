@@ -1,3 +1,4 @@
+import { BookFilm } from '../components/BookFilm';
 import type { Book } from '../types';
 import { BookLinks } from '../components/BookLinks';
 
@@ -9,5 +10,6 @@ export function PlaylistBookPage({ book }: { book: Book }) {
     <div class="english-book-author">{book.author}</div>
     {book.description && <div class="english-book-intro"><p>{book.description}</p></div>}
     <BookLinks book={book} />
+      <BookFilm book={book} />
   </div>;
 }

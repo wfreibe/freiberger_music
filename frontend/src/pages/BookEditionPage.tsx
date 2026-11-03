@@ -1,3 +1,4 @@
+import { BookFilm } from '../components/BookFilm';
 import { BookLinks } from '../components/BookLinks';
 import { useEffect, useState } from 'preact/hooks';
 import { activeTrack, isPlaying, playTrack, setTrackList } from '../player/playerStore';
@@ -60,6 +61,7 @@ export function BookEditionPage({ edition, book }: { edition: 'en' | 'fr'; book:
       </div>
 
       <BookLinks book={book} />
+      <BookFilm book={book} />
       <div class="editorial-tab-group">
         <button type="button" class={`editorial-tab-btn ${activeTab === 'songs' ? 'active' : ''}`}
           aria-pressed={activeTab === 'songs'} onClick={() => setActiveTab('songs')}>

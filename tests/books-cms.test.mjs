@@ -5,7 +5,7 @@ import { build } from '../frontend/node_modules/esbuild/lib/main.js';
 import { fileURLToPath } from 'node:url';
 
 const result = await build({ entryPoints: [fileURLToPath(new URL('../frontend/src/data/books.ts', import.meta.url))], bundle: true, platform: 'node', format: 'esm', write: false });
-const { bookMenu, findBook, bookMedia, redScarfMediaCopy } = await import('data:text/javascript;base64,' + Buffer.from(result.outputFiles[0].text).toString('base64'));
+const { bookMenu, findBook, bookMedia, redScarfMediaCopy, bookFilm } = await import('data:text/javascript;base64,' + Buffer.from(result.outputFiles[0].text).toString('base64'));
 const book = (id, values = {}) => ({ id, slug: `book-${id}`, title: `Book ${id}`, language: 'de', is_published: 1, show_in_navigation: 1, sort_order: 10, soundtrack_source: 'series', ...values });
 
 test('book menu follows CMS publication, navigation visibility and stable ordering', () => {
@@ -45,4 +45,18 @@ test('Red Scarf recordings retain playlist order, video IDs and recording langua
   assert.equal(redScarfMediaCopy(edition,'en').audiobook,'Audiobook in German');
   assert.equal(redScarfMediaCopy(edition,'fr').songs,'Chansons en français');
   assert.equal(redScarfMediaCopy(book(2),'de'),null);
+});
+
+test('book film uses a validated video and its own player identity', () => {
+  const filmBook = book(4, {slug:'der-rote-schal', film_youtube_id:'rnweaIuC_-Y', film_title:'Verified film title', film_duration:'4:27'});
+  const film = bookFilm(filmBook);
+  assert.equal(film.youtube_id,'rnweaIuC_-Y');
+  assert.equal(film.title,'Verified film title');
+  assert.equal(film.duration,'4:27');
+  assert.equal(film.type,'film');
+  assert.ok(film.id < -1000000000);
+  assert.notEqual(film.id,bookFilm({...filmBook,id:5}).id);
+  assert.equal(film.series_title,filmBook.title);
+  assert.equal(bookFilm(book(1)),null);
+  assert.equal(bookFilm({...filmBook,film_youtube_id:'https://untrusted.example/video'}),null);
 });
