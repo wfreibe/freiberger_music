@@ -8,7 +8,7 @@ deploy-domainfactory*/
 *.zip
 .deployment-backups/
 storage/
-data/
+/data/
 backups/
 config/cms_config.php
 *.sqlite*
