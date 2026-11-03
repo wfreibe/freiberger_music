@@ -1,3 +1,4 @@
+import { PlaylistBookPage } from './pages/PlaylistBookPage';
 import { AmbientStage } from './components/AmbientStage';
 import { HeaderNav } from './components/HeaderNav';
 import { PlayerBar } from './components/PlayerBar';
@@ -35,7 +36,7 @@ export function App() {
   } else if (path === '/impressum' || path === '/datenschutz' || path === '/legal') {
     pageComponent = <LegalPage />;
   } else if (book) {
-    pageComponent = book.language === 'de' ? <BookPage key={book.id} book={book} />
+    pageComponent = book.songs_playlist_url && book.soundtrack_series_id == null ? <PlaylistBookPage key={book.id} book={book} /> : book.language === 'de' ? <BookPage key={book.id} book={book} />
       : <BookEditionPage key={book.id} edition={book.language} book={book} />;
   } else if (path !== '/') {
     pageComponent = <div class="hero-stage" role="status">

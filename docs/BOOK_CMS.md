@@ -36,3 +36,9 @@ Prüfung: `npm test`, anschließend `npm run package:deploy`,
 `MUSIC_TEST_PACKAGE=dist-packages/freiberger-music-deploy.zip node --test tests/cms.test.mjs`
 sowie `node --test tests/private-preparation.test.mjs`. Tests verwenden synthetische
 Daten. Das bestehende Deployment führt Migrationen weiterhin mit `--without-backup` aus.
+
+## Buchlinks und Der rote Schal
+
+Migration 104 ergänzt DE, EN und FR des neuen Buchs sowie vier optionale HTTPS-Linkfelder: Buchkauf, Songs-Playlist, deutsches Hörbuch und Film. Der epubli-Suchlink wird einmalig für bestehende Bücher eingetragen. Neue Bücher können den Link im CMS erhalten. Alle Links sind dort änderbar oder entfernbar.
+
+Bücher mit Songs-Playlist ohne zugeordnete Soundtrack-Serie verwenden eine Buchseite mit Links statt leerer Titellisten. Die YouTube-Links öffnen extern; es werden keine ungeprüften Tracknamen oder Kapitel importiert. Der Hörbuchlink ist in allen drei Ausgaben als deutsch gekennzeichnet. Beschreibungen und Cover können im CMS nachgetragen werden.

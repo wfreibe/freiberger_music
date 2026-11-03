@@ -82,6 +82,16 @@ test('CMS migration, secure authentication and music CRUD with isolated syntheti
   for (const area of ['places', 'books', 'chapters', 'series']) assert.ok((await request(`cms/${area}`)).data.fields.length);
   const bookList = (await request('cms/books')).data;
   assert.deepEqual(bookList.fields.slice(0, 7).map(field => field.name), ['language','title','menu_label','sort_order','show_in_navigation','is_published','slug']);
+  const scarf = bookList.items.filter(row => ['der-rote-schal','l-echarpe-rouge','the-red-scarf'].includes(row.item.slug));
+  assert.equal(scarf.length, 3);
+  assert.deepEqual(scarf.map(row => row.item.language).sort(), ['de','en','fr']);
+  for (const {item} of scarf) {
+    assert.equal(item.songs_playlist_url, 'https://www.youtube.com/playlist?list=PLZZxqjAKPSZo');
+    assert.equal(item.audiobook_playlist_url, 'https://www.youtube.com/playlist?list=PLP8djEaASfxE');
+    assert.equal(item.film_url, 'https://www.youtube.com/playlist?list=PLefRR8TMnDiU');
+    assert.equal(item.purchase_url, 'https://www.epubli.com/?s=Werner+Freiberger');
+  }
+  await request(`cms/books/${scarf[0].item.id}`, 'PUT', {item:{film_url:'javascript:alert(1)'},revision:scarf[0].revision},400);
   const enBook = bookList.items.find(row => row.item.slug === 'the-places-that-saw-us');
   const frBook = bookList.items.find(row => row.item.slug === 'les-lieux-qui-nous-ont-vus');
   assert.equal(enBook.item.language, 'en'); assert.equal(frBook.item.language, 'fr');

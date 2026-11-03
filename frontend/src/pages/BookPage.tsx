@@ -1,3 +1,4 @@
+import { BookLinks } from '../components/BookLinks';
 import { useEffect, useState } from 'preact/hooks';
 import { Book, Release } from '../types';
 import { fetchReleases } from '../api/client';
@@ -80,6 +81,7 @@ export function BookPage({ book }: { book: Book }) {
       </div>
 
       {/* EDITORIAL TABS (Responsive Segmented Control) */}
+      <BookLinks book={book} />
       <div class="editorial-tab-group">
         <button
           type="button"

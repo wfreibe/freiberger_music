@@ -68,6 +68,10 @@ export interface Book {
   soundtrack_source: 'series' | 'english_book';
   soundtrack_series_id?: number | null;
   audiobook_series_id?: number | null;
+  purchase_url?: string | null;
+  songs_playlist_url?: string | null;
+  audiobook_playlist_url?: string | null;
+  film_url?: string | null;
   chapters?: Chapter[];
 }
 
