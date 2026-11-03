@@ -80,6 +80,34 @@ test('CMS migration, secure authentication and music CRUD with isolated syntheti
   const created = await request('cms/series', 'POST', { item: { slug: 'new-series', title: 'New Series' } }, 201);
   await request(`cms/series/${created.data.item.id}`, 'DELETE', { revision: created.data.revision });
   for (const area of ['places', 'books', 'chapters', 'series']) assert.ok((await request(`cms/${area}`)).data.fields.length);
+  const bookList = (await request('cms/books')).data;
+  assert.deepEqual(bookList.fields.slice(0, 7).map(field => field.name), ['language','title','menu_label','sort_order','show_in_navigation','is_published','slug']);
+  const enBook = bookList.items.find(row => row.item.slug === 'the-places-that-saw-us');
+  const frBook = bookList.items.find(row => row.item.slug === 'les-lieux-qui-nous-ont-vus');
+  assert.equal(enBook.item.language, 'en'); assert.equal(frBook.item.language, 'fr');
+  await request(`cms/books/${enBook.item.id}`, 'PUT', { item: { language: 'es' }, revision: enBook.revision }, 400);
+  await request(`cms/books/${enBook.item.id}`, 'PUT', { item: { is_published: 2 }, revision: enBook.revision }, 400);
+  await request(`cms/books/${enBook.item.id}`, 'PUT', { item: { sort_order: -1 }, revision: enBook.revision }, 400);
+  await request(`cms/books/${enBook.item.id}`, 'PUT', { item: { slug: 'places' }, revision: enBook.revision }, 400);
+  const editedBook = (await request(`cms/books/${enBook.item.id}`, 'PUT', { item: { title: 'Edited English Book', description: 'Description from CMS', menu_label: 'EN menu', sort_order: 1, show_in_navigation: 0 }, revision: enBook.revision })).data;
+  const publicBook = (await request('books/the-places-that-saw-us')).data;
+  assert.equal(publicBook.title, 'Edited English Book'); assert.equal(publicBook.show_in_navigation, 0);
+  const publishedBooks = (await request('books')).data;
+  assert.equal(publishedBooks[0].menu_label, 'EN menu', 'Public API respects CMS order.');
+  php(['bin/migrate.php']);
+  assert.equal((await request('books/the-places-that-saw-us')).data.description, 'Description from CMS', 'Repeated migration preserves CMS edits.');
+  if (process.env.MUSIC_TEST_PACKAGE) {
+    const html = await fetch(`http://127.0.0.1:${port}/the-places-that-saw-us`); assert.equal(html.status, 200); assert.match(await html.text(), /Edited English Book/);
+  }
+  const draft = (await request(`cms/books/${enBook.item.id}`, 'PUT', { item: { is_published: 0 }, revision: editedBook.revision })).data;
+  await request('books/the-places-that-saw-us', 'GET', undefined, 404);
+  assert.ok(!(await request('books')).data.some(row => row.id === enBook.item.id));
+  assert.ok((await request('cms/books')).data.items.some(row => row.item.id === enBook.item.id), 'Draft remains editable in CMS.');
+  if (process.env.MUSIC_TEST_PACKAGE) {
+    const html = await fetch(`http://127.0.0.1:${port}/the-places-that-saw-us`); assert.equal(html.status, 404); assert.ok(!(await html.text()).includes('Edited English Book'));
+  }
+  await request(`cms/books/${enBook.item.id}`, 'PUT', { item: { is_published: 1, slug: 'custom-english-book' }, revision: draft.revision });
+  assert.equal((await request('books/custom-english-book')).data.language, 'en');
   await request('cms/logout', 'POST', {});
   await request('cms/releases', 'GET', undefined, 401);
   await request('cms/session');

@@ -5,13 +5,18 @@ if (!function_exists('normalizeYouTubeVideoId')) require_once __DIR__ . '/YouTub
 final class MusicContent
 {
     public const TABLES = ['releases', 'places', 'books', 'chapters', 'series'];
-    public const LINKS = ['place_id' => 'places', 'book_id' => 'books', 'release_id' => 'releases', 'chapter_id' => 'chapters', 'series_id' => 'series'];
+    public const LINKS = ['place_id' => 'places', 'book_id' => 'books', 'release_id' => 'releases', 'chapter_id' => 'chapters', 'series_id' => 'series', 'soundtrack_series_id' => 'series', 'audiobook_series_id' => 'series'];
 
     public static function fields(PDO $db, string $table): array
     {
         if (!in_array($table, self::TABLES, true)) throw new InvalidArgumentException('Unbekannter Inhaltsbereich.');
-        return array_values(array_filter($db->query("PRAGMA table_info($table)")->fetchAll(),
+        $fields = array_values(array_filter($db->query("PRAGMA table_info($table)")->fetchAll(),
             static fn($field) => !in_array($field['name'], ['id', 'created_at'], true)));
+        if ($table === 'books') {
+            $order = array_flip(['language','title','menu_label','sort_order','show_in_navigation','is_published','slug']);
+            usort($fields, static fn($a,$b) => ($order[$a['name']] ?? 99) <=> ($order[$b['name']] ?? 99) ?: $a['cid'] <=> $b['cid']);
+        }
+        return $fields;
     }
 
     public static function revision(array $row): string
@@ -43,6 +48,7 @@ final class MusicContent
                 }
                 $value = (int)$value;
                 if ($name === 'featured' && !in_array($value, [0, 1], true)) throw new InvalidArgumentException('Ungültiger Sichtbarkeitswert.');
+                if (in_array($name, ['show_in_navigation','is_published'], true) && !in_array($value, [0,1], true)) throw new InvalidArgumentException('Ungültiger Sichtbarkeitswert.');
                 if (isset(self::LINKS[$name])) {
                     $target = self::LINKS[$name];
                     $stmt = $db->prepare("SELECT 1 FROM $target WHERE id=?");
@@ -54,6 +60,10 @@ final class MusicContent
                 $value = trim($value);
                 if ($field['notnull'] && $value === '') throw new InvalidArgumentException("Pflichtfeld fehlt: $name");
                 if ($name === 'slug' && !preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/D', $value)) throw new InvalidArgumentException('Ungültiger URL-Name.');
+                if ($table === 'books' && $name === 'slug' && in_array($value, ['api','cms','studio','places','gard-7','gard7','impressum','datenschutz','legal','assets','covers','server','storage'], true)) throw new InvalidArgumentException('Dieser URL-Name ist für eine Systemseite reserviert.');
+                if ($table === 'books' && $name === 'language' && !in_array($value, ['de','en','fr'], true)) throw new InvalidArgumentException('Bitte DE, EN oder FR auswählen.');
+                if ($name === 'soundtrack_source' && !in_array($value, ['series','english_book'], true)) throw new InvalidArgumentException('Ungültige Soundtrack-Quelle.');
+                if ($name === 'menu_label' && strlen($value) > 200) throw new InvalidArgumentException('Menübezeichnung ist zu lang.');
                 if ($name === 'type' && !in_array($value, ['song','audiobook','gard7','single','ep','album','chapter_audio'], true)) throw new InvalidArgumentException('Ungültiger Inhaltstyp.');
                 if ($name === 'youtube_id') {
                     $value = normalizeYouTubeVideoId($value);

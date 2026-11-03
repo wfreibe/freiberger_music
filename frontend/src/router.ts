@@ -1,7 +1,7 @@
 import { signal } from '@preact/signals';
 
 export function getSubfolderPrefix(): string {
-  if (typeof window !== 'undefined' && window.location.pathname.startsWith('/freiberger-music')) {
+  if (typeof window !== 'undefined' && (window.location.pathname === '/freiberger-music' || window.location.pathname.startsWith('/freiberger-music/'))) {
     return '/freiberger-music';
   }
   return '';

@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "node scripts/dev-server.mjs",
     "build": "npm --prefix frontend run build",
-    "test": "node --test tests/i18n.test.mjs tests/media-catalog.test.mjs tests/book-soundtrack.test.mjs tests/book-audiobooks.test.mjs tests/cms.test.mjs",
+    "test": "node --test tests/i18n.test.mjs tests/media-catalog.test.mjs tests/book-soundtrack.test.mjs tests/book-audiobooks.test.mjs tests/books-cms.test.mjs tests/cms.test.mjs",
     "migrate": "php bin/migrate.php",
     "package:deploy": "npm run build && node scripts/package-deploy.mjs"
   }

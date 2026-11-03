@@ -1,5 +1,6 @@
 import { navigate } from '../router';
 import { currentLang, t } from '../i18n';
+import { books, bookMenu } from '../data/books';
 
 export function Footer() {
   const handleNav = (e: MouseEvent, to: string) => {
@@ -40,21 +41,11 @@ export function Footer() {
                   {t('nav_places')}
                 </a>
               </li>
-              <li>
-                <a href="#/die-orte-die-uns-sahen" onClick={(e) => handleNav(e, '/die-orte-die-uns-sahen')} style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '13px', transition: 'color 0.2s' }}>
-                  DIE ORTE, DIE UNS SAHEN
+              {bookMenu(books.value ?? []).map(book => <li key={book.id}>
+                <a href={`#/${book.slug}`} onClick={e => handleNav(e, '/' + book.slug)} style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '13px', transition: 'color 0.2s' }}>
+                  {book.menu_label || book.title}
                 </a>
-              </li>
-              <li>
-                <a href="#/the-places-that-saw-us" onClick={(e) => handleNav(e, '/the-places-that-saw-us')} style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '13px', transition: 'color 0.2s' }}>
-                  THE PLACES THAT SAW US
-                </a>
-              </li>
-              <li>
-                <a href="#/les-lieux-qui-nous-ont-vus" onClick={(e) => handleNav(e, '/les-lieux-qui-nous-ont-vus')} style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '13px', transition: 'color 0.2s' }}>
-                  LES LIEUX QUI NOUS ONT VUS
-                </a>
-              </li>
+              </li>)}
               <li>
                 <a href="#/gard-7" onClick={(e) => handleNav(e, '/gard-7')} style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '13px', transition: 'color 0.2s' }}>
                   {t('nav_gard7')}

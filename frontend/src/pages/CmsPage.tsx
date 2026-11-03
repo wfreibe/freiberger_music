@@ -11,6 +11,8 @@ const areas: Record<string, string> = { releases: 'Musik & Hörbücher', books: 
 const links: Record<string, string> = { place_id: 'places', book_id: 'books', chapter_id: 'chapters', release_id: 'releases', series_id: 'series' };
 const labels: Record<string, string> = { slug: 'URL-Name', title: 'Titel', name: 'Name', subtitle: 'Untertitel', type: 'Inhaltstyp', release_date: 'Veröffentlichung', cover: 'Cover', youtube_id: 'YouTube-Video oder Video-Link', youtube_playlist_id: 'YouTube-Playlist-ID', genre: 'Genre', bpm: 'Tempo (BPM)', duration: 'Dauer', description: 'Beschreibung', story: 'Geschichte', lyrics: 'Songtext', featured: 'Hervorgehoben', sort_order: 'Reihenfolge', place_id: 'Ort', book_id: 'Buch', chapter_id: 'Kapitel', release_id: 'Veröffentlichung', series_id: 'Album / Serie', greek_name: 'Griechischer Name', tagline: 'Leitsatz', coordinates: 'Koordinaten', image: 'Bild', accent_color: 'Akzentfarbe', chapter_number: 'Kapitelnummer', excerpt: 'Auszug', author: 'Autor' };
 const longText = new Set(['description', 'story', 'lyrics', 'excerpt']);
+Object.assign(links, { soundtrack_series_id: 'series', audiobook_series_id: 'series' });
+Object.assign(labels, { language: 'Sprache der Buchausgabe', menu_label: 'Menübezeichnung (leer = Buchtitel)', show_in_navigation: 'Im Bücher-Menü anzeigen', is_published: 'Veröffentlicht / öffentlich erreichbar', soundtrack_source: 'Soundtrack-Quelle', soundtrack_series_id: 'Serie für den Soundtrack', audiobook_series_id: 'Serie für das Hörbuch' });
 
 export function CmsPage() {
   const [csrf, setCsrf] = useState('');
@@ -100,10 +102,12 @@ export function CmsPage() {
       const result = await request(selected ? `${area}/${selected.item.id}` : area, selected ? 'PUT' : 'POST', { item, revision: selected?.revision });
       setSelected(result); setDraft({ ...result.item }); await load(area); setMessage('Gespeichert.');
     });
-  }}><h2>{selected ? 'Inhalt bearbeiten' : 'Neuer Inhalt'}</h2><fieldset disabled={busy}>
+  }}><h2>{selected ? 'Inhalt bearbeiten' : 'Neuer Inhalt'}</h2>
+    {area === 'books' && <p>„Veröffentlicht“ steuert die öffentliche Buchseite. „Im Bücher-Menü anzeigen“ steuert die Links in Kopf- und Fußbereich. Kleinere Reihenfolgen erscheinen zuerst. Ohne eigene Menübezeichnung wird der Buchtitel verwendet.</p>}
+    <fieldset disabled={busy}>
     {collection.fields.map(field => {
       const name = field.name; const value = draft[name] ?? ''; const update = (v: string) => setDraft({ ...draft, [name]: v });
-      const options = links[name] ? collection.choices[links[name]].map(row => [String(row.id), row.label]) : name === 'type' ? [['song','Song (Buch-Soundtrack)'],['audiobook','Hörbuch'],['gard7','GARD 7'],['single','Single'],['ep','EP'],['album','Album'],['chapter_audio','Audio-Kapitel']] : name === 'featured' ? [['0','Nein'],['1','Ja']] : null;
+      const options = links[name] ? collection.choices[links[name]].map(row => [String(row.id), row.label]) : name === 'language' ? [['de','DE – Deutsch'],['en','EN – Englisch'],['fr','FR – Französisch']] : name === 'soundtrack_source' ? [['series','Aus gewählter Serie'],['english_book','Englischer Bestandssoundtrack (10 Titel)']] : name === 'type' ? [['song','Song (Buch-Soundtrack)'],['audiobook','Hörbuch'],['gard7','GARD 7'],['single','Single'],['ep','EP'],['album','Album'],['chapter_audio','Audio-Kapitel']] : ['featured','is_published','show_in_navigation'].includes(name) ? [['0','Nein'],['1','Ja']] : null;
       return <label>{labels[name] || name}{options ? <select value={String(value)} required={!!field.notnull} onChange={event => update(event.currentTarget.value)}>{!field.notnull && <option value="">Keine Zuordnung</option>}{options.map(([id, label]) => <option value={id}>{label}</option>)}</select> : longText.has(name) ? <textarea rows={6} value={value} onInput={event => update(event.currentTarget.value)} /> : <input value={value} required={!!field.notnull} type={field.type.includes('INT') ? 'number' : name === 'release_date' ? 'date' : 'text'} min={field.type.includes('INT') ? 0 : undefined} onInput={event => update(event.currentTarget.value)} />}</label>;
     })}
     {collection.fields.some(f => ['cover', 'image'].includes(f.name)) && <label>Bild hochladen (JPEG, PNG, WebP; max. 8 MiB)<input type="file" accept="image/jpeg,image/png,image/webp" onChange={event => {

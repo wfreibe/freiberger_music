@@ -338,6 +338,8 @@ export function getPlaceDescription(place: { slug?: string; description?: string
 
 export function getBookDescription(book: { slug?: string; description?: string | null } | null | undefined): string {
   if (!book) return '';
+  const originalDescription = 'Eine biografisch-poetische Reise durch Griechenland. Elf Kapitel und ein Epilog erzählen von Jugend, Freiheit, Aufbrüchen, Freundschaft und den Schauplätzen, die als Musik und Erinnerung weiterleben.';
+  if (book.description !== originalDescription) return book.description || '';
   if (currentLang.value === 'fr' && book.slug === 'die-orte-die-uns-sahen') {
     return 'Un voyage biographique et poétique à travers la Grèce. Onze chapitres et un épilogue racontent la jeunesse, la liberté, les départs, l’amitié et les lieux qui continuent de vivre dans la musique et les souvenirs.';
   }

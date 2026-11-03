@@ -48,7 +48,7 @@ test('private preparation preserves live files, imports current media and create
   assert.match(fs.readFileSync(path.join(target, '.htaccess'), 'utf8'), /Require all denied/);
   const clone = path.join(target, 'server', 'data', 'content.sqlite');
   const inspect = php(['-r', '$d=new PDO("sqlite:".$argv[1]); echo json_encode([$d->query("PRAGMA integrity_check")->fetchColumn(),$d->query("SELECT COUNT(*) FROM admin_credentials")->fetchColumn(),$d->query("SELECT COUNT(*) FROM music_schema_migrations")->fetchColumn()]);', clone]);
-  assert.equal(inspect.status, 0, inspect.stderr); assert.deepEqual(JSON.parse(inspect.stdout), ['ok', 0, 2]);
+  assert.equal(inspect.status, 0, inspect.stderr); assert.deepEqual(JSON.parse(inspect.stdout), ['ok', 0, 3]);
   assert.notEqual(prepare(target).status, 0, 'Existing preparation is never overwritten.');
   assert.deepEqual(manifest(live), before);
   if (process.platform !== 'win32') assert.equal(fs.statSync(target).mode & 0o777, 0o700);
@@ -60,10 +60,13 @@ test('explicit migration without backup applies schema without creating backup f
   const env = { ...process.env, CMS_CONFIG_PATH: '', CMS_DB_PATH: path.join(temp, 'content.sqlite'), CMS_BACKUP_DIR: path.join(temp, 'backups') };
   const php = args => spawnSync('php', args, { env, encoding: 'utf8', windowsHide: true });
   const fixture = php(['tests/cms-fixture.php']); assert.equal(fixture.status, 0, fixture.stderr);
+  const existing = php(['-r', '$d=new PDO("sqlite:".getenv("CMS_DB_PATH")); $d->exec("INSERT INTO books(slug,title,author) VALUES(\'the-places-that-saw-us\',\'Owner English title\',\'Local author\')");']); assert.equal(existing.status, 0, existing.stderr);
   const result = php(['bin/migrate.php', '--without-backup']); assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /integrity_check=ok; foreign_key_check=0/);
   assert.equal(fs.existsSync(env.CMS_BACKUP_DIR), false);
   const invalid = php(['bin/migrate.php', '--unknown-option']); assert.notEqual(invalid.status, 0);
   const inspect = php(['-r', '$d=new PDO("sqlite:".getenv("CMS_DB_PATH")); echo json_encode([$d->query("SELECT COUNT(*) FROM releases")->fetchColumn(),$d->query("SELECT COUNT(*) FROM music_schema_migrations")->fetchColumn()]);']);
-  assert.equal(inspect.status, 0, inspect.stderr); assert.deepEqual(JSON.parse(inspect.stdout), [1, 2]);
+  assert.equal(inspect.status, 0, inspect.stderr); assert.deepEqual(JSON.parse(inspect.stdout), [1, 3]);
+  const preserved = php(['-r', '$d=new PDO("sqlite:".getenv("CMS_DB_PATH"));echo json_encode($d->query("SELECT title,author,language,soundtrack_source FROM books WHERE slug=\'the-places-that-saw-us\'")->fetch(PDO::FETCH_NUM));']);
+  assert.equal(preserved.status, 0, preserved.stderr); assert.deepEqual(JSON.parse(preserved.stdout), ['Owner English title','Local author','en','english_book']);
 });

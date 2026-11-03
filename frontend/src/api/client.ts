@@ -1,7 +1,7 @@
 import { Release, Place, Book, Series } from '../types';
 
 export const getApiBase = () => {
-  if (typeof window !== 'undefined' && window.location.pathname.startsWith('/freiberger-music')) {
+  if (typeof window !== 'undefined' && (window.location.pathname === '/freiberger-music' || window.location.pathname.startsWith('/freiberger-music/'))) {
     return '/freiberger-music/api';
   }
   return '/api';
@@ -66,13 +66,19 @@ export async function fetchPlaceBySlug(slug: string): Promise<Place | null> {
 
 export async function fetchBook(slug: string = 'die-orte-die-uns-sahen'): Promise<Book | null> {
   try {
-    const res = await fetch(`${getApiBase()}/books/${slug}`);
+    const res = await fetch(`${getApiBase()}/books/${encodeURIComponent(slug)}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
   } catch (err) {
     console.error(`API fetch for book ${slug} failed:`, err);
     return null;
   }
+}
+
+export async function fetchBooks(): Promise<Book[]> {
+  const response = await fetch(`${getApiBase()}/books`, { signal: AbortSignal.timeout(15000) });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return response.json();
 }
 
 export async function fetchSeries(): Promise<Series[]> {

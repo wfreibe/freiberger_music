@@ -10,25 +10,38 @@ import { BookEditionPage } from './pages/BookEditionPage';
 import { LegalPage } from './pages/LegalPage';
 import { Gard7Page } from './pages/Gard7Page';
 import { getCleanPath } from './router';
+import { useEffect } from 'preact/hooks';
+import { books, booksError, findBook, loadBooks } from './data/books';
+import { setLanguage } from './i18n';
 
 export function App() {
   const path = getCleanPath();
+  const book = findBook(books.value ?? [], path);
+  useEffect(() => {
+    void loadBooks();
+    const refresh = () => { void loadBooks(); };
+    window.addEventListener('focus', refresh);
+    return () => window.removeEventListener('focus', refresh);
+  }, []);
+  useEffect(() => { if (book) setLanguage(book.language); }, [path, book?.id, book?.language]);
 
   // Simple, robust client-side route dispatch
   let pageComponent = <HomePage />;
 
-  if (path.startsWith('/places')) {
+  if (path === '/places' || path.startsWith('/places/')) {
     pageComponent = <PlacesPage />;
-  } else if (path === '/die-orte-die-uns-sahen' || path === '/die-orte-die-mich-sahen') {
-    pageComponent = <BookPage />;
-  } else if (path === '/the-places-that-saw-us') {
-    pageComponent = <BookEditionPage key="en" edition="en" />;
-  } else if (path === '/les-lieux-qui-nous-ont-vus') {
-    pageComponent = <BookEditionPage key="fr" edition="fr" />;
   } else if (path === '/gard-7' || path === '/gard7') {
     pageComponent = <Gard7Page />;
   } else if (path === '/impressum' || path === '/datenschutz' || path === '/legal') {
     pageComponent = <LegalPage />;
+  } else if (book) {
+    pageComponent = book.language === 'de' ? <BookPage key={book.id} book={book} />
+      : <BookEditionPage key={book.id} edition={book.language} book={book} />;
+  } else if (path !== '/') {
+    pageComponent = <div class="hero-stage" role="status">
+      <h1 class="hero-headline">{booksError.value ? 'Buch nicht erreichbar' : books.value === null ? 'Buch wird geladen …' : 'Buch nicht verfügbar'}</h1>
+      {booksError.value && <button class="btn-editorial btn-editorial-ghost" onClick={() => void loadBooks()}>Erneut laden</button>}
+    </div>;
   }
 
   return (

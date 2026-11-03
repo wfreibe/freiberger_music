@@ -1,15 +1,13 @@
 import { useEffect, useState } from 'preact/hooks';
 import { Book, Release } from '../types';
-import { fetchBook, fetchReleases } from '../api/client';
+import { fetchReleases } from '../api/client';
 import { activeTrack, isPlaying, playTrack, setTrackList } from '../player/playerStore';
 import { t, translatePlaceName, translateSubtitle } from '../i18n';
 import { getBookDescription } from '../i18n/contentTranslations';
 import { getMediaUrl } from '../utils/media';
-import { isBookSoundtrack } from '../data/bookSoundtrack';
-import { getBookAudiobooks } from '../data/bookAudiobooks';
+import { bookMedia } from '../data/books';
 
-export function BookPage() {
-  const [book, setBook] = useState<Book | null>(null);
+export function BookPage({ book }: { book: Book }) {
   const [songs, setSongs] = useState<Release[]>([]);
   const [audiobooks, setAudiobooks] = useState<Release[]>([]);
   const [activeTab, setActiveTab] = useState<'songs' | 'audiobooks'>('songs');
@@ -17,15 +15,12 @@ export function BookPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
     async function load() {
-      const [bookData, allReleases] = await Promise.all([
-        fetchBook('die-orte-die-uns-sahen'),
-        fetchReleases()
-      ]);
-      setBook(bookData);
-
-      const songList = allReleases.filter(isBookSoundtrack);
-      const abList = getBookAudiobooks(allReleases, 'de');
+      const allReleases = await fetchReleases();
+      if (cancelled) return;
+      const { songs: songList, audiobooks: abList } = bookMedia(book, allReleases);
 
       setSongs(songList);
       setAudiobooks(abList);
@@ -33,7 +28,8 @@ export function BookPage() {
       setLoading(false);
     }
     load();
-  }, []);
+    return () => { cancelled = true; };
+  }, [book.soundtrack_source, book.soundtrack_series_id, book.audiobook_series_id]);
 
   const handlePlay = (rel: Release) => {
     setTrackList(activeTab === 'songs' ? songs : audiobooks);
@@ -50,16 +46,6 @@ export function BookPage() {
     );
   }
 
-  if (!book) {
-    return <div class="hero-stage" role="alert">
-      <h1 class="hero-headline">DIE ORTE, DIE UNS SAHEN</h1>
-      <p>Die Buchinhalte konnten nicht geladen werden. Bitte versuche es erneut.</p>
-      <button type="button" class="btn-editorial btn-editorial-ghost" onClick={() => window.location.reload()}>
-        Erneut laden
-      </button>
-    </div>;
-  }
-
   return (
     <div class="hero-stage" style={{ paddingBottom: '90px' }}>
       <div class="hero-super">
@@ -67,7 +53,7 @@ export function BookPage() {
       </div>
 
       <h1 class="hero-headline" style={{ fontSize: 'clamp(2.8rem, 7vw, 7.5rem)', maxWidth: '1100px' }}>
-        DIE ORTE, DIE UNS SAHEN
+        {book.title.toLocaleUpperCase(book.language)}
       </h1>
 
       <div style={{ fontSize: '1.25rem', color: 'var(--accent-sand)', letterSpacing: '0.05em', marginBottom: '8px' }}>

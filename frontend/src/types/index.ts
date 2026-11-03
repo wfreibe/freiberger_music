@@ -60,6 +60,14 @@ export interface Book {
   cover?: string;
   release_year?: number;
   formats?: string;
+  language: 'de' | 'en' | 'fr';
+  menu_label?: string | null;
+  sort_order: number;
+  show_in_navigation: number;
+  is_published: number;
+  soundtrack_source: 'series' | 'english_book';
+  soundtrack_series_id?: number | null;
+  audiobook_series_id?: number | null;
   chapters?: Chapter[];
 }
 

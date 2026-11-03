@@ -1,32 +1,31 @@
 import { useEffect, useState } from 'preact/hooks';
 import { activeTrack, isPlaying, playTrack, setTrackList } from '../player/playerStore';
-import { englishBookPlaylistUrl, englishBookSoundtrack } from '../data/englishBookSoundtrack';
-import type { Release } from '../types';
+import { englishBookPlaylistUrl } from '../data/englishBookSoundtrack';
+import type { Book, Release } from '../types';
 import { fetchReleases } from '../api/client';
 import { getMediaUrl } from '../utils/media';
 import { currentLang } from '../i18n';
 import { getBookEditionCopy } from '../i18n/bookEdition';
-import { isBookSoundtrack } from '../data/bookSoundtrack';
-import { getBookAudiobooks } from '../data/bookAudiobooks';
+import { bookMedia } from '../data/books';
 
-export function BookEditionPage({ edition }: { edition: 'en' | 'fr' }) {
+export function BookEditionPage({ edition, book }: { edition: 'en' | 'fr'; book: Book }) {
   const french = edition === 'fr';
-  const [songs, setSongs] = useState<Release[]>(french ? [] : englishBookSoundtrack);
+  const [songs, setSongs] = useState<Release[]>(bookMedia(book, []).songs);
   const [audiobooks, setAudiobooks] = useState<Release[]>([]);
-  const [loading, setLoading] = useState(french);
+  const [loading, setLoading] = useState(true);
   const [reloadKey, setReloadKey] = useState(0);
   useEffect(() => {
-    if (!french) return;
     let cancelled = false;
     setLoading(true);
     fetchReleases().then(tracks => {
       if (cancelled) return;
-      setSongs(tracks.filter(isBookSoundtrack));
-      setAudiobooks(getBookAudiobooks(tracks, 'fr'));
+      const media = bookMedia(book, tracks);
+      setSongs(media.songs);
+      setAudiobooks(media.audiobooks);
       setLoading(false);
     });
     return () => { cancelled = true; };
-  }, [french, reloadKey]);
+  }, [book.soundtrack_source, book.soundtrack_series_id, book.audiobook_series_id, reloadKey]);
   const language = currentLang.value;
   const copy = getBookEditionCopy(edition, language);
   const [activeTab, setActiveTab] = useState<'songs' | 'audiobook'>('songs');
@@ -42,17 +41,20 @@ export function BookEditionPage({ edition }: { edition: 'en' | 'fr' }) {
     <div class="hero-stage" lang={language} style={{ paddingBottom: '90px' }}>
       <div class="hero-super">{copy.super}</div>
       <h1 class="hero-headline" lang={edition} style={{ fontSize: 'clamp(2.8rem, 7vw, 7.5rem)', maxWidth: '1100px' }}>
-        {copy.title}
+        {book.title.toLocaleUpperCase(book.language)}
       </h1>
-      <div class="english-book-author">Werner Freiberger</div>
+      {book.subtitle && <div class="english-book-author">{book.subtitle}</div>}
+      <div class="english-book-author">{book.author}</div>
       <div class="book-formats-badges" style={{ marginBottom: '32px' }}>
-        <span class="book-format-chip">{copy.book}</span>
-        <span class="book-format-chip">{copy.ebook}</span>
-        <span class="book-format-chip">{copy.soundtrack}</span>
+        {book.formats ? book.formats.split('·').map(format => <span key={format} class="book-format-chip">{format.trim()}</span>) : <>
+          <span class="book-format-chip">{copy.book}</span>
+          <span class="book-format-chip">{copy.ebook}</span>
+          <span class="book-format-chip">{copy.soundtrack}</span>
+        </>}
       </div>
       <div class="english-book-intro">
-        <p>{copy.welcome} <em lang={edition}>{copy.name}</em>.</p>
-        <p>{copy.intro}</p>
+        <p>{copy.welcome} <em lang={edition}>{book.title}</em>.</p>
+        <p>{book.description ?? copy.intro}</p>
       </div>
 
       <div class="editorial-tab-group">
@@ -66,11 +68,11 @@ export function BookEditionPage({ edition }: { edition: 'en' | 'fr' }) {
             setActiveTab('audiobook');
           }}>
           <span class="tab-title-main">{copy.audiobook}</span>
-          <span class="editorial-tab-badge">{french ? `${audiobooks.length} ${copy.chapters}` : 'Coming soon'}</span>
+          <span class="editorial-tab-badge">{french || book.audiobook_series_id != null ? `${audiobooks.length} ${copy.chapters}` : 'Coming soon'}</span>
         </button>
       </div>
 
-      {activeTab === 'songs' || french ? (
+      {activeTab === 'songs' || french || book.audiobook_series_id != null ? (
         <section aria-label={sectionTitle} class="english-book-soundtrack">
           <div class="english-soundtrack-toolbar">
             <span>{sectionTitle} · {tracks.length} {activeTab === 'audiobook' ? copy.chapters : copy.songs}</span>
@@ -108,7 +110,7 @@ export function BookEditionPage({ edition }: { edition: 'en' | 'fr' }) {
               </button>;
             })}
           </div>
-          {!french && <a class="btn-editorial btn-editorial-ghost" href={englishBookPlaylistUrl} target="_blank" rel="noopener noreferrer" style={{ marginTop: '24px' }}>
+          {book.soundtrack_source === 'english_book' && <a class="btn-editorial btn-editorial-ghost" href={englishBookPlaylistUrl} target="_blank" rel="noopener noreferrer" style={{ marginTop: '24px' }}>
             {copy.playlist}
           </a>}
         </section>

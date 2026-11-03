@@ -94,47 +94,27 @@ try {
     // 5. Route dispatch
     $db = freiberger_get_db();
 
-    if ($route === '/die-orte-die-uns-sahen' || $route === '/die-orte-die-mich-sahen') {
-        $pageTitle = 'Die Orte, die uns sahen — Buch & Hörbuch | FREIBERGER';
-        $pageDesc = 'Eine biografisch-poetische Reise durch Griechenland. Elf Kapitel und ein Epilog von Werner Freiberger – als Buch, ungekürztes Hörbuch und Soundtrack.';
-        
-        $chaptersList = '';
-        if ($db) {
-            try {
-                $stmt = $db->query("SELECT chapter_number, title, subtitle FROM chapters WHERE book_id = 1 ORDER BY CAST(chapter_number AS INTEGER) ASC");
-                $rows = $stmt->fetchAll();
-                foreach ($rows as $row) {
-                    $chaptersList .= '<li><strong>Kapitel ' . htmlspecialchars((string)$row['chapter_number']) . ': ' . htmlspecialchars($row['title']) . '</strong>' . ($row['subtitle'] ? ' – ' . htmlspecialchars($row['subtitle']) : '') . '</li>';
-                }
-            } catch (\Throwable $e) {}
+    $cmsBook = null;
+    if ($db && preg_match('#^/([a-z0-9-]+)$#D', $route, $bookMatch)) {
+        $bookSlug = $bookMatch[1] === 'die-orte-die-mich-sahen' ? 'die-orte-die-uns-sahen' : $bookMatch[1];
+        $stmt = $db->prepare('SELECT * FROM books WHERE slug=? LIMIT 1');
+        $stmt->execute([$bookSlug]);
+        $cmsBook = $stmt->fetch();
+    }
+    if ($cmsBook) {
+        if (!(int)$cmsBook['is_published']) {
+            http_response_code(404);
+            $pageTitle = 'Buch nicht verfügbar | FREIBERGER';
+            $pageDesc = 'Dieses Buch ist nicht veröffentlicht.';
+            $noscriptHtml = '<article class="seo-content"><h1>Buch nicht verfügbar</h1></article>';
+        } else {
+            $pageTitle = $cmsBook['title'] . ' | FREIBERGER';
+            $pageDesc = $cmsBook['description'] ?: $cmsBook['title'] . ' · ' . $cmsBook['author'];
+            $escape = static fn($value) => htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            $noscriptHtml = '<article class="seo-content" lang="' . $escape($cmsBook['language']) . '"><h1>'
+                . $escape($cmsBook['title']) . '</h1><p>' . $escape($cmsBook['subtitle']) . '</p><p>'
+                . $escape($cmsBook['author']) . '</p><p>' . $escape($cmsBook['description']) . '</p></article>';
         }
-
-        $noscriptHtml = '<article class="seo-content">'
-            . '<h1>Die Orte, die uns sahen</h1>'
-            . '<p class="subtitle">Als die Zukunft noch keinen Namen hatte · Ein Werk von Werner Freiberger</p>'
-            . '<p>Eine biografisch-poetische Reise durch Griechenland. Elf Kapitel und ein Epilog erzählen von Jugend, Freiheit, Aufbrüchen, Freundschaft und den Schauplätzen, die als Musik und Erinnerung weiterleben.</p>'
-            . '<p>Formate: BUCH · E-BOOK · HÖRBUCH · MUSIK (2026)</p>'
-            . ($chaptersList ? '<h2>Kapitelübersicht</h2><ul>' . $chaptersList . '</ul>' : '')
-            . '</article>';
-
-    } elseif ($route === '/the-places-that-saw-us') {
-        $pageTitle = 'The Places That Saw Us — Book & Soundtrack | FREIBERGER';
-        $pageDesc = 'The English edition of The Places That Saw Us by Werner Freiberger. Discover the accompanying soundtrack. Audiobook coming soon.';
-        $noscriptHtml = '<article class="seo-content" lang="en">'
-            . '<h1>The Places That Saw Us</h1>'
-            . '<p>By Werner Freiberger</p>'
-            . '<p>The soundtrack to the English edition.</p>'
-            . '<h2>Audiobook</h2><p>Coming soon</p>'
-            . '</article>';
-
-    } elseif ($route === '/les-lieux-qui-nous-ont-vus') {
-        $pageTitle = 'Les lieux qui nous ont vus — Livre & musique | FREIBERGER';
-        $pageDesc = 'L’édition française de Werner Freiberger, accompagnée des chansons en allemand. Livre audio en français disponible.';
-        $noscriptHtml = '<article class="seo-content" lang="fr">'
-            . '<h1>Les lieux qui nous ont vus</h1><p>Werner Freiberger</p>'
-            . '<p>Découvrez les chansons en allemand qui accompagnent le livre.</p>'
-            . '<h2>Livre audio</h2><p>Écoutez les douze chapitres en français.</p></article>';
-
     } elseif (str_starts_with($route, '/places/')) {
         $slug = substr($route, strlen('/places/'));
         $place = null;

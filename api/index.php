@@ -175,7 +175,7 @@ switch ($resource) {
             $targetSlug = ($identifier === 'die-orte-die-mich-sahen') ? 'die-orte-die-uns-sahen' : $identifier;
 
             // Single book with its chapters and linked songs
-            $stmt = $pdo->prepare("SELECT * FROM books WHERE slug = :slug OR slug = :orig_slug OR id = :id LIMIT 1");
+            $stmt = $pdo->prepare("SELECT * FROM books WHERE is_published=1 AND (slug = :slug OR slug = :orig_slug OR id = :id) LIMIT 1");
             $stmt->execute([
                 ':slug' => $targetSlug,
                 ':orig_slug' => $identifier,
@@ -205,7 +205,7 @@ switch ($resource) {
 
             jsonResponse($book);
         } else {
-            $stmt = $pdo->query("SELECT * FROM books ORDER BY id ASC");
+            $stmt = $pdo->query("SELECT * FROM books WHERE is_published=1 ORDER BY sort_order ASC, id ASC");
             jsonResponse($stmt->fetchAll());
         }
         break;
