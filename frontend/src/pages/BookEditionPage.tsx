@@ -7,7 +7,7 @@ import { fetchReleases } from '../api/client';
 import { getMediaUrl } from '../utils/media';
 import { currentLang } from '../i18n';
 import { getBookEditionCopy } from '../i18n/bookEdition';
-import { bookMedia } from '../data/books';
+import { bookMedia, redScarfMediaCopy } from '../data/books';
 
 export function BookEditionPage({ edition, book }: { edition: 'en' | 'fr'; book: Book }) {
   const french = edition === 'fr';
@@ -28,6 +28,7 @@ export function BookEditionPage({ edition, book }: { edition: 'en' | 'fr'; book:
     return () => { cancelled = true; };
   }, [book.soundtrack_source, book.soundtrack_series_id, book.audiobook_series_id, reloadKey]);
   const language = currentLang.value;
+  const mediaCopy = redScarfMediaCopy(book, language);
   const copy = getBookEditionCopy(edition, language);
   const [activeTab, setActiveTab] = useState<'songs' | 'audiobook'>('songs');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -55,7 +56,7 @@ export function BookEditionPage({ edition, book }: { edition: 'en' | 'fr'; book:
       </div>
       <div class="english-book-intro">
         <p>{copy.welcome} <em lang={edition}>{book.title}</em>.</p>
-        <p>{book.description ?? copy.intro}</p>
+        <p>{book.description ?? mediaCopy?.intro ?? copy.intro}</p>
       </div>
 
       <BookLinks book={book} />
@@ -63,13 +64,13 @@ export function BookEditionPage({ edition, book }: { edition: 'en' | 'fr'; book:
         <button type="button" class={`editorial-tab-btn ${activeTab === 'songs' ? 'active' : ''}`}
           aria-pressed={activeTab === 'songs'} onClick={() => setActiveTab('songs')}>
           <span class="tab-title-main">{copy.soundtrack}</span>
-          <span class="editorial-tab-badge">{songs.length} {copy.songs} · {copy.subtitle}</span>
+          <span class="editorial-tab-badge">{songs.length} {copy.songs} · {mediaCopy?.songs ?? copy.subtitle}</span>
         </button>
         <button type="button" class={`editorial-tab-btn ${activeTab === 'audiobook' ? 'active' : ''}`}
           aria-pressed={activeTab === 'audiobook'} onClick={() => {
             setActiveTab('audiobook');
           }}>
-          <span class="tab-title-main">{copy.audiobook}</span>
+          <span class="tab-title-main">{mediaCopy?.audiobook ?? copy.audiobook}</span>
           <span class="editorial-tab-badge">{french || book.audiobook_series_id != null ? `${audiobooks.length} ${copy.chapters}` : 'Coming soon'}</span>
         </button>
       </div>

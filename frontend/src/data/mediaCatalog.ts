@@ -30,9 +30,9 @@ export function buildMediaCatalog(releases: Release[]): CatalogEntry[] {
     if (unique.has(key)) continue;
     const kind = release.type === 'audiobook' || release.type === 'chapter_audio' ? 'audiobook' : 'music';
     let language: MediaLanguage = 'unknown';
-    if (release.series_slug === 'livre-audio-les-lieux-qui-nous-ont-vus') language = 'fr';
+    if (['livre-audio-les-lieux-qui-nous-ont-vus', 'der-rote-schal-soundtrack'].includes(release.series_slug || '')) language = 'fr';
     else if (englishSongSlugs.has(release.slug) || (videoId && englishSongs.has(videoId))) language = 'en';
-    else if ((videoId && germanSongs.has(videoId)) || ['the-greece-chapters', 'hoerbuch-die-orte-die-uns-sahen'].includes(release.series_slug || '')) language = 'de';
+    else if ((videoId && germanSongs.has(videoId)) || ['the-greece-chapters', 'hoerbuch-die-orte-die-uns-sahen', 'hoerbuch-der-rote-schal'].includes(release.series_slug || '')) language = 'de';
     unique.set(key, { key, release, kind, language });
   }
   return [...unique.values()].sort((a, b) => {

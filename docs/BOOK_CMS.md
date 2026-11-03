@@ -42,3 +42,9 @@ Daten. Das bestehende Deployment führt Migrationen weiterhin mit `--without-bac
 Migration 104 ergänzt DE, EN und FR des neuen Buchs sowie vier optionale HTTPS-Linkfelder: Buchkauf, Songs-Playlist, deutsches Hörbuch und Film. Der epubli-Suchlink wird einmalig für bestehende Bücher eingetragen. Neue Bücher können den Link im CMS erhalten. Alle Links sind dort änderbar oder entfernbar.
 
 Bücher mit Songs-Playlist ohne zugeordnete Soundtrack-Serie verwenden eine Buchseite mit Links statt leerer Titellisten. Die YouTube-Links öffnen extern; es werden keine ungeprüften Tracknamen oder Kapitel importiert. Der Hörbuchlink ist in allen drei Ausgaben als deutsch gekennzeichnet. Beschreibungen und Cover können im CMS nachgetragen werden.
+
+## Direkt abspielbare Medien für Der rote Schal
+
+Migration 105 importiert den öffentlichen YouTube-Stand vom 3. November 2026: sieben französische Songs und fünf deutsche Hörbuchkapitel. Sie legt zwei Serien an und ordnet diese den drei Buchausgaben zu, sofern dort noch keine Medienserien gepflegt sind. Vorhandene Datensätze werden nicht überschrieben. Die deutschen Kapitel werden dem deutschen Buch zugeordnet; alle Ausgaben verwenden dieselbe Hörbuchserie.
+
+Die Buchseiten nutzen damit die vorhandenen Song-/Hörbuchansichten und den Website-Player. Unter Musik & Hörbücher und Alben & Serien lassen sich Videos, Titel und Zuordnungen weiter pflegen. Neue YouTube-Einträge werden nicht automatisch synchronisiert. Der Film bleibt als externer Link bestehen.

@@ -1,0 +1,72 @@
+{
+  "songs": {
+    "playlist": "PLZZxqjAKPSZo",
+    "videos": [
+      {
+        "id": "jOs8Onr2OGk",
+        "title": "Ton nom sous le mien",
+        "duration": "4:01"
+      },
+      {
+        "id": "yp_tqAPo5R8",
+        "title": "La maille reprise",
+        "duration": "4:04"
+      },
+      {
+        "id": "ZX7Lf_DaAj0",
+        "title": "L’écharpe rouge",
+        "duration": "4:50"
+      },
+      {
+        "id": "M7eLFLAp3Ps",
+        "title": "Entre deux arbres",
+        "duration": "4:37"
+      },
+      {
+        "id": "vlge0nd7wvw",
+        "title": "L’embranchement",
+        "duration": "4:57"
+      },
+      {
+        "id": "9GZLvUnbTSE",
+        "title": "La signature",
+        "duration": "4:20"
+      },
+      {
+        "id": "pSRhiHuUAKk",
+        "title": "Le fil rouge",
+        "duration": "5:09"
+      }
+    ]
+  },
+  "audiobook": {
+    "playlist": "PLP8djEaASfxE",
+    "videos": [
+      {
+        "id": "XWCJ6cE1mWo",
+        "title": "Der Rote Schal | Kapitel 01 | Innach",
+        "duration": "25:22"
+      },
+      {
+        "id": "ZowSUTMRbKg",
+        "title": "Der Rote Schal | Kapitel 02 | Bei Penzing",
+        "duration": "29:43"
+      },
+      {
+        "id": "9Msq8RqaYbU",
+        "title": "Der Rote Schal | Kapitel 03 | Die Männer in der Stube",
+        "duration": "33:30"
+      },
+      {
+        "id": "gS63F3i5eEY",
+        "title": "Der Rote Schal | Kapitel 04 | Haag",
+        "duration": "31:13"
+      },
+      {
+        "id": "o3OLzD_AWiA",
+        "title": "Der Rote Schal | Kapitel 05 | Die sechs Brote",
+        "duration": "29:37"
+      }
+    ]
+  }
+}

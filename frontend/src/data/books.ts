@@ -32,3 +32,13 @@ export function bookMedia(book: Book, releases: Release[]): { songs: Release[]; 
       .sort((a, b) => (a.chapter_number ?? a.sort_order ?? 0) - (b.chapter_number ?? b.sort_order ?? 0)),
   };
 }
+
+// Labels describe the verified recording language, independently of the book edition.
+export function redScarfMediaCopy(book: Book, language: 'de' | 'en' | 'fr') {
+  if (!book.songs_playlist_url?.includes('list=PLZZxqjAKPSZo')) return null;
+  return {
+    de: { songs: 'Songs auf Französisch', audiobook: 'Hörbuch auf Deutsch', intro: 'Hier findest du die französischen Songs und die bisher veröffentlichten deutschen Hörbuchkapitel.' },
+    en: { songs: 'Songs in French', audiobook: 'Audiobook in German', intro: 'Listen to the French songs and the German audiobook chapters published so far.' },
+    fr: { songs: 'Chansons en français', audiobook: 'Livre audio en allemand', intro: 'Écoutez les chansons en français et les chapitres du livre audio en allemand publiés à ce jour.' },
+  }[language];
+}

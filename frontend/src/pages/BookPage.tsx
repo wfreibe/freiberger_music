@@ -3,12 +3,13 @@ import { useEffect, useState } from 'preact/hooks';
 import { Book, Release } from '../types';
 import { fetchReleases } from '../api/client';
 import { activeTrack, isPlaying, playTrack, setTrackList } from '../player/playerStore';
-import { t, translatePlaceName, translateSubtitle } from '../i18n';
+import { currentLang, t, translatePlaceName, translateSubtitle } from '../i18n';
 import { getBookDescription } from '../i18n/contentTranslations';
 import { getMediaUrl } from '../utils/media';
-import { bookMedia } from '../data/books';
+import { bookMedia, redScarfMediaCopy } from '../data/books';
 
 export function BookPage({ book }: { book: Book }) {
+  const mediaCopy = redScarfMediaCopy(book, currentLang.value);
   const [songs, setSongs] = useState<Release[]>([]);
   const [audiobooks, setAudiobooks] = useState<Release[]>([]);
   const [activeTab, setActiveTab] = useState<'songs' | 'audiobooks'>('songs');
@@ -76,7 +77,7 @@ export function BookPage({ book }: { book: Book }) {
       <div style={{ maxWidth: '820px', fontSize: '15px', color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: '40px' }}>
         <p style={{ marginBottom: '14px' }}>{getBookDescription(book)}</p>
         <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-          {t('book_welcome_hint')}
+          {mediaCopy?.intro ?? t('book_welcome_hint')}
         </p>
       </div>
 
@@ -89,7 +90,7 @@ export function BookPage({ book }: { book: Book }) {
           class={`editorial-tab-btn ${activeTab === 'songs' ? 'active' : ''}`}
         >
           <span class="tab-title-main">{t('book_tab_songs_main')}</span>
-          <span class="editorial-tab-badge">{songs.length} {t('book_songs_badge')} · {t('book_tab_songs_sub')}</span>
+          <span class="editorial-tab-badge">{songs.length} {t('book_songs_badge')} · {mediaCopy?.songs ?? t('book_tab_songs_sub')}</span>
         </button>
 
         <button
@@ -98,7 +99,7 @@ export function BookPage({ book }: { book: Book }) {
           class={`editorial-tab-btn ${activeTab === 'audiobooks' ? 'active' : ''}`}
         >
           <span class="tab-title-main">{t('book_tab_audiobook_main')}</span>
-          <span class="editorial-tab-badge">{audiobooks.length} {t('book_audiobook_badge')} · {t('book_tab_audiobook_sub')}</span>
+          <span class="editorial-tab-badge">{audiobooks.length} {t('book_audiobook_badge')} · {mediaCopy?.audiobook ?? t('book_tab_audiobook_sub')}</span>
         </button>
       </div>
 
@@ -194,7 +195,7 @@ export function BookPage({ book }: { book: Book }) {
                     </div>
 
                     <div class="card-meta-top">
-                      <span>{translatePlaceName(song.place_name) || t('default_place')}</span>
+                      <span>{translatePlaceName(song.place_name) || (mediaCopy ? '' : t('default_place'))}</span>
                       {song.bpm && <span style={{ color: 'var(--accent-sand)' }}>{song.bpm} BPM</span>}
                       {song.duration && <span>{song.duration}</span>}
                     </div>
@@ -281,7 +282,7 @@ export function BookPage({ book }: { book: Book }) {
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
             <div style={{ fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--accent-sand)' }}>
-              {t('book_audiobook_intro')} · {audiobooks.length} {t('book_audiobook_badge')}
+              {mediaCopy?.audiobook ?? t('book_audiobook_intro')} · {audiobooks.length} {t('book_audiobook_badge')}
             </div>
 
             {/* View Mode Toggle: Cards vs List */}
@@ -368,7 +369,7 @@ export function BookPage({ book }: { book: Book }) {
                     </div>
 
                     <div class="card-meta-top">
-                      <span>{translatePlaceName(ab.place_name) || t('default_place')}</span>
+                      <span>{translatePlaceName(ab.place_name) || (mediaCopy ? '' : t('default_place'))}</span>
                       {ab.duration && <span>⏱ {ab.duration}</span>}
                     </div>
 

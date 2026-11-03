@@ -1,10 +1,11 @@
+import fs from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { build } from '../frontend/node_modules/esbuild/lib/main.js';
 import { fileURLToPath } from 'node:url';
 
 const result = await build({ entryPoints: [fileURLToPath(new URL('../frontend/src/data/books.ts', import.meta.url))], bundle: true, platform: 'node', format: 'esm', write: false });
-const { bookMenu, findBook, bookMedia } = await import('data:text/javascript;base64,' + Buffer.from(result.outputFiles[0].text).toString('base64'));
+const { bookMenu, findBook, bookMedia, redScarfMediaCopy } = await import('data:text/javascript;base64,' + Buffer.from(result.outputFiles[0].text).toString('base64'));
 const book = (id, values = {}) => ({ id, slug: `book-${id}`, title: `Book ${id}`, language: 'de', is_published: 1, show_in_navigation: 1, sort_order: 10, soundtrack_source: 'series', ...values });
 
 test('book menu follows CMS publication, navigation visibility and stable ordering', () => {
@@ -28,4 +29,20 @@ test('book media use selected series and preserve the existing English soundtrac
   assert.deepEqual(media.songs.map(row => row.id), [1,2]); assert.deepEqual(media.audiobooks.map(row => row.id), [5,4]);
   assert.equal(bookMedia(book(2, {language:'en',soundtrack_source:'english_book'}), rows).songs.length, 10);
   assert.deepEqual(bookMedia(book(3), rows), {songs:[],audiobooks:[]});
+});
+
+test('Red Scarf recordings retain playlist order, video IDs and recording language labels', () => {
+  const manifest = JSON.parse(fs.readFileSync(new URL('../scripts/red-scarf-playlists.json', import.meta.url), 'utf8'));
+  assert.equal(manifest.songs.videos.length, 7);
+  assert.equal(manifest.audiobook.videos.length, 5);
+  const tracks = ['songs','audiobook'].flatMap((kind, group) => manifest[kind].videos.map((video,index) => ({...video, id: group*100+index, youtube_id:video.id, type: group ? 'audiobook' : 'song', series_id: group+1, chapter_number: group ? index+1 : null})));
+  const edition = book(1, {soundtrack_series_id:1,audiobook_series_id:2,songs_playlist_url:'https://www.youtube.com/playlist?list=PLZZxqjAKPSZo'});
+  const media = bookMedia(edition,tracks);
+  assert.deepEqual(media.songs.map(track => track.youtube_id),manifest.songs.videos.map(video => video.id));
+  assert.deepEqual(media.audiobooks.map(track => track.youtube_id),manifest.audiobook.videos.map(video => video.id));
+  assert.equal(new Set(tracks.map(track => track.youtube_id)).size,12);
+  for (const track of tracks) assert.match(track.youtube_id,/^[A-Za-z0-9_-]{11}$/);
+  assert.equal(redScarfMediaCopy(edition,'en').audiobook,'Audiobook in German');
+  assert.equal(redScarfMediaCopy(edition,'fr').songs,'Chansons en français');
+  assert.equal(redScarfMediaCopy(book(2),'de'),null);
 });

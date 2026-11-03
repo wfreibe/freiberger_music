@@ -49,7 +49,7 @@ test('CMS migration, secure authentication and music CRUD with isolated syntheti
     if (data.csrf_token) csrf = data.csrf_token;
     return { data, response };
   }
-  const publicRead = await request('releases'); assert.equal(publicRead.data.length, 1); assert.equal(publicRead.response.headers.get('set-cookie'), null);
+  const publicRead = await request('releases'); assert.equal(publicRead.data.length, 13); assert.equal(publicRead.response.headers.get('set-cookie'), null);
   await request('releases', 'POST', {}, 405);
   await request('cms/releases', 'GET', undefined, 401);
   const session = await request('cms/session'); assert.equal(session.data.authenticated, false); assert.match(session.response.headers.get('set-cookie'), /HttpOnly/i); assert.match(session.response.headers.get('set-cookie'), /SameSite=Strict/i);
@@ -59,8 +59,8 @@ test('CMS migration, secure authentication and music CRUD with isolated syntheti
   await request('cms/releases', 'GET', undefined, 403);
   await request('cms/password', 'POST', { password: 'short', confirmation: 'short' }, 400);
   await request('cms/password', 'POST', { password: 'New-synthetic-credential-123', confirmation: 'New-synthetic-credential-123' });
-  const list = await request('cms/releases'); assert.equal(list.data.items.length, 1);
-  let row = list.data.items[0];
+  const list = await request('cms/releases'); assert.equal(list.data.items.length, 13);
+  let row = list.data.items.find(row => row.item.id === 1);
   await request('cms/releases/1', 'PUT', { item: { title: 'Edited Song' }, revision: row.revision }, 403, 'wrong');
   await request('cms/releases/1', 'PUT', { item: { place_id: 999 }, revision: row.revision }, 400);
   await request('cms/releases/1', 'PUT', { item: { cover: 'javascript:alert(1)' }, revision: row.revision }, 400);
@@ -90,6 +90,13 @@ test('CMS migration, secure authentication and music CRUD with isolated syntheti
     assert.equal(item.audiobook_playlist_url, 'https://www.youtube.com/playlist?list=PLP8djEaASfxE');
     assert.equal(item.film_url, 'https://www.youtube.com/playlist?list=PLefRR8TMnDiU');
     assert.equal(item.purchase_url, 'https://www.epubli.com/?s=Werner+Freiberger');
+  }
+  const allMedia = (await request('releases')).data;
+  for (const {item} of scarf) {
+    assert.equal(allMedia.filter(track => track.series_id === item.soundtrack_series_id).length, 7);
+    const chapters = allMedia.filter(track => track.series_id === item.audiobook_series_id);
+    assert.equal(chapters.length, 5);
+    assert.deepEqual(chapters.map(track => track.chapter_number).sort((a,b) => a-b), [1,2,3,4,5]);
   }
   await request(`cms/books/${scarf[0].item.id}`, 'PUT', {item:{film_url:'javascript:alert(1)'},revision:scarf[0].revision},400);
   const enBook = bookList.items.find(row => row.item.slug === 'the-places-that-saw-us');
