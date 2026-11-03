@@ -52,6 +52,7 @@ test('CMS migration, secure authentication and music CRUD with isolated syntheti
   const publicRead = await request('releases'); assert.equal(publicRead.data.length, 13); assert.equal(publicRead.response.headers.get('set-cookie'), null);
   await request('releases', 'POST', {}, 405);
   await request('cms/releases', 'GET', undefined, 401);
+  await request('cms/preview/books/1', 'GET', undefined, 401);
   const session = await request('cms/session'); assert.equal(session.data.authenticated, false); assert.match(session.response.headers.get('set-cookie'), /HttpOnly/i); assert.match(session.response.headers.get('set-cookie'), /SameSite=Strict/i);
   await request('cms/login', 'POST', { username: 'admin', password }, 403, 'wrong');
   await request('cms/login', 'POST', { username: 'admin', password: 'invalid' }, 401);
@@ -116,7 +117,13 @@ test('CMS migration, secure authentication and music CRUD with isolated syntheti
   if (process.env.MUSIC_TEST_PACKAGE) {
     const html = await fetch(`http://127.0.0.1:${port}/the-places-that-saw-us`); assert.equal(html.status, 200); assert.match(await html.text(), /Edited English Book/);
   }
+  await request('cms/preview/unknown/1', 'GET', undefined, 404);
+  await request('cms/preview/books/999999', 'GET', undefined, 404);
   const draft = (await request(`cms/books/${enBook.item.id}`, 'PUT', { item: { is_published: 0 }, revision: editedBook.revision })).data;
+  const preview = await request(`cms/preview/books/${enBook.item.id}`);
+  assert.equal(preview.data.item.title, 'Edited English Book');
+  assert.equal(preview.data.item.is_published, 0);
+  assert.match(preview.response.headers.get('cache-control'), /(?:^|,\s*)no-store(?:,|$)/);
   await request('books/the-places-that-saw-us', 'GET', undefined, 404);
   assert.ok(!(await request('books')).data.some(row => row.id === enBook.item.id));
   assert.ok((await request('cms/books')).data.items.some(row => row.item.id === enBook.item.id), 'Draft remains editable in CMS.');
@@ -127,6 +134,7 @@ test('CMS migration, secure authentication and music CRUD with isolated syntheti
   assert.equal((await request('books/custom-english-book')).data.language, 'en');
   await request('cms/logout', 'POST', {});
   await request('cms/releases', 'GET', undefined, 401);
+  await request('cms/preview/books/1', 'GET', undefined, 401);
   await request('cms/session');
   for (let i = 0; i < 5; i++) await request('cms/login', 'POST', { username: 'admin', password: 'incorrect' }, 401);
   await request('cms/login', 'POST', { username: 'admin', password: 'incorrect' }, 429);

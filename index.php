@@ -61,6 +61,11 @@ try {
         $route = rtrim($route, '/');
     }
 
+    if (preg_match('#^/(cms|studio)(/|$)#', $route)) {
+        header('X-Robots-Tag: noindex, nofollow');
+        header('Cache-Control: no-store');
+    }
+
     if ($route === '/the_places_that_saw_us') {
         $route = '/the-places-that-saw-us';
     }

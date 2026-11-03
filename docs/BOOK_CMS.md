@@ -48,3 +48,11 @@ Bücher mit Songs-Playlist ohne zugeordnete Soundtrack-Serie verwenden eine Buch
 Migration 105 importiert den öffentlichen YouTube-Stand vom 3. November 2026: sieben französische Songs und fünf deutsche Hörbuchkapitel. Sie legt zwei Serien an und ordnet diese den drei Buchausgaben zu, sofern dort noch keine Medienserien gepflegt sind. Vorhandene Datensätze werden nicht überschrieben. Die deutschen Kapitel werden dem deutschen Buch zugeordnet; alle Ausgaben verwenden dieselbe Hörbuchserie.
 
 Die Buchseiten nutzen damit die vorhandenen Song-/Hörbuchansichten und den Website-Player. Unter Musik & Hörbücher und Alben & Serien lassen sich Videos, Titel und Zuordnungen weiter pflegen. Neue YouTube-Einträge werden nicht automatisch synchronisiert. Der Film bleibt als externer Link bestehen.
+
+## CMS-Vorschau und Redaktionsoberfläche
+
+Der Redaktionsbereich verwendet Seitenleiste, Kopfzeile, Statusanzeige und Inhaltskarten nach dem Vorbild von freiberger.design. Nach Auswahl eines Eintrags klappt die Inhaltsliste zusammen; über „Inhalt auswählen“ kann ein anderer Eintrag gewählt werden.
+
+Die Desktop-Vorschau rendert mit 1280 Pixeln, die Mobil-Vorschau mit 375 Pixeln (jeweils einschließlich Browser-Scrollleiste). Die Ansicht wird auf den verfügbaren Platz skaliert. Buchseiten verwenden dieselben Komponenten wie öffentlich; Musik, Kapitel, Orte und Serien zeigen die gespeicherten Inhalte mit den Website-Styles und dem vorhandenen Medien-Slider. Die Vorschau ist eine Inhaltskontrolle, die Navigation innerhalb des Rahmens ersetzt keinen öffentlichen Website-Besuch.
+
+Die Vorschau zeigt ausschließlich gespeicherte Werte. Ungespeicherte Änderungen werden markiert. Speichern lädt die Vorschau neu; „Aktualisieren“ lädt sie bei Bedarf erneut. Neue Einträge erhalten nach dem ersten Speichern eine Vorschau. Unveröffentlichte Bücher können angemeldet angesehen werden, ohne sie öffentlich freizugeben. Der Lese-Endpunkt `/api/cms/preview/{Bereich}/{ID}` erfordert die bestehende CMS-Anmeldung und liefert `Cache-Control: no-store`. Es gibt keine Datenmigration.

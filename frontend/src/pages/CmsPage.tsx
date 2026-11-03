@@ -1,3 +1,4 @@
+import { CmsPreviewFrame } from '../components/CmsPreviewFrame';
 import { useEffect, useState } from 'preact/hooks';
 import { getApiBase } from '../api/client';
 import '../styles/cms-workspace.css';
@@ -12,7 +13,7 @@ const links: Record<string, string> = { place_id: 'places', book_id: 'books', ch
 const labels: Record<string, string> = { slug: 'URL-Name', title: 'Titel', name: 'Name', subtitle: 'Untertitel', type: 'Inhaltstyp', release_date: 'Veröffentlichung', cover: 'Cover', youtube_id: 'YouTube-Video oder Video-Link', youtube_playlist_id: 'YouTube-Playlist-ID', genre: 'Genre', bpm: 'Tempo (BPM)', duration: 'Dauer', description: 'Beschreibung', story: 'Geschichte', lyrics: 'Songtext', featured: 'Hervorgehoben', sort_order: 'Reihenfolge', place_id: 'Ort', book_id: 'Buch', chapter_id: 'Kapitel', release_id: 'Veröffentlichung', series_id: 'Album / Serie', greek_name: 'Griechischer Name', tagline: 'Leitsatz', coordinates: 'Koordinaten', image: 'Bild', accent_color: 'Akzentfarbe', chapter_number: 'Kapitelnummer', excerpt: 'Auszug', author: 'Autor' };
 const longText = new Set(['description', 'story', 'lyrics', 'excerpt']);
 Object.assign(links, { soundtrack_series_id: 'series', audiobook_series_id: 'series' });
-Object.assign(labels, { purchase_url: 'Buch kaufen (HTTPS-Link)', songs_playlist_url: 'Songs – YouTube-Playlist', audiobook_playlist_url: 'Hörbuch – YouTube-Playlist', film_url: 'Film – HTTPS-Link', language: 'Sprache der Buchausgabe', menu_label: 'Menübezeichnung (leer = Buchtitel)', show_in_navigation: 'Im Bücher-Menü anzeigen', is_published: 'Veröffentlicht / öffentlich erreichbar', soundtrack_source: 'Soundtrack-Quelle', soundtrack_series_id: 'Serie für den Soundtrack', audiobook_series_id: 'Serie für das Hörbuch' });
+Object.assign(labels, { release_year: 'Erscheinungsjahr', formats: 'Formate (durch · trennen)', purchase_url: 'Buch kaufen (HTTPS-Link)', songs_playlist_url: 'Songs – YouTube-Playlist', audiobook_playlist_url: 'Hörbuch – YouTube-Playlist', film_url: 'Film – HTTPS-Link', language: 'Sprache der Buchausgabe', menu_label: 'Menübezeichnung (leer = Buchtitel)', show_in_navigation: 'Im Bücher-Menü anzeigen', is_published: 'Veröffentlicht / öffentlich erreichbar', soundtrack_source: 'Soundtrack-Quelle', soundtrack_series_id: 'Serie für den Soundtrack', audiobook_series_id: 'Serie für das Hörbuch' });
 
 export function CmsPage() {
   const [csrf, setCsrf] = useState('');
@@ -26,6 +27,9 @@ export function CmsPage() {
   const [selected, setSelected] = useState<RecordVersion | null>(null);
   const [draft, setDraft] = useState<Item | null>(null);
   const [filter, setFilter] = useState('');
+  const [showList, setShowList] = useState(true);
+  const [previewWidth, setPreviewWidth] = useState<'desktop' | 'mobile'>('desktop');
+  const [previewReload, setPreviewReload] = useState(0);
   const dirty = draft !== null && JSON.stringify(draft) !== JSON.stringify(selected?.item ?? null);
 
   async function request(route: string, method = 'GET', body?: unknown) {
@@ -83,20 +87,20 @@ export function CmsPage() {
     <p role="status">{message}</p><button disabled={busy || !csrf}>{changePassword ? 'Passwort speichern' : 'Anmelden'}</button><a href="/">Zur Website</a>
   </form></div>;
 
-  return <div class="music-cms cms-workspace"><aside class="cms-workspace-sidebar"><div class="cms-workspace-brand"><strong>FREIBERGER.MUSIC</strong><small>REDAKTIONSBEREICH</small></div><nav aria-label="Inhaltsbereiche">
+  return <div class="music-cms cms-workspace"><aside class="cms-workspace-sidebar"><div class="cms-workspace-brand"><strong>FREIBERGER.MUSIC</strong><small>REDAKTIONSBEREICH</small></div><div class="cms-workspace-nav-group"><p class="cms-workspace-nav-label">INHALTE VERWALTEN</p><nav aria-label="Inhaltsbereiche">
     {Object.entries(areas).map(([key, label]) => <button class={`cms-workspace-nav-item ${key === area ? 'is-selected' : ''}`} disabled={busy} aria-current={key === area ? 'page' : undefined} onClick={() => {
-      if (key !== area && mayLeave()) { setArea(key); setDraft(null); setSelected(null); setMessage(''); setFilter(''); }
+      if (key !== area && mayLeave()) { setArea(key); setShowList(true); setDraft(null); setSelected(null); setMessage(''); setFilter(''); }
     }}>{label}</button>)}
-    <a href="/" target="_blank" rel="noopener">Website ansehen ↗</a><button disabled={busy} onClick={() => { if (mayLeave()) perform(async () => { await request('logout', 'POST', {}); setAuthenticated(false); setDraft(null); const data = await request('session'); setCsrf(data.csrf_token); }); }}>Abmelden</button>
-  </nav></aside><main class="music-cms-main"><header><h1>{areas[area]}</h1><button disabled={busy || !collection} onClick={() => {
+    </nav></div><div class="cms-workspace-sidebar-bottom"><p>Inhalte pflegen.<br />Geschichten erzählen.</p><a href="/" target="_blank" rel="noopener">Website ansehen ↗</a><button disabled={busy} onClick={() => { if (mayLeave()) perform(async () => { await request('logout', 'POST', {}); setAuthenticated(false); setDraft(null); const data = await request('session'); setCsrf(data.csrf_token); }); }}>Abmelden</button>
+  </div></aside><div class="cms-workspace-shell"><header class="cms-workspace-topbar"><div class="cms-workspace-breadcrumb">Redaktionsbereich <span>/</span> <strong>{areas[area]}</strong></div><span class="cms-workspace-avatar" aria-label="Administrator">WF</span></header><main class="music-cms-main cms-workspace-main"><header class="cms-workspace-heading"><div><span class="cms-workspace-eyebrow">RAUM FÜR DEINE INHALTE</span><h1>{areas[area]}</h1><p>Inhalte bearbeiten und die gespeicherte Ansicht deiner Website prüfen.</p></div><button disabled={busy || !collection} onClick={() => {
     if (!mayLeave() || !collection) return;
     const item: Item = {};
     for (const f of collection.fields) item[f.name] = f.dflt_value === null ? '' : f.dflt_value.replace(/^'(.*)'$/, '$1');
     setSelected(null); setDraft(item); setMessage('');
-  }}>Neuer Inhalt</button></header><p role="status" aria-live="polite">{message}</p>
-  {!collection ? <p>Inhalte werden geladen …</p> : <div class="music-cms-columns"><section aria-label="Inhaltsliste"><input aria-label="Inhalte filtern" placeholder="Suchen …" value={filter} onInput={event => setFilter(event.currentTarget.value)} /><ul class="music-cms-list">
-    {collection.items.filter(row => String(row.item.title || row.item.name).toLowerCase().includes(filter.toLowerCase())).map(row => <li><button disabled={busy} aria-pressed={row.item.id === selected?.item.id} onClick={() => { if (mayLeave()) { setSelected(row); setDraft({ ...row.item }); setMessage(''); } }}><strong>{row.item.title || row.item.name}</strong><small>{row.item.type || row.item.slug || `Nr. ${row.item.chapter_number}`}</small></button></li>)}
-  </ul></section><section aria-label="Inhalt bearbeiten">{!draft ? <p>Inhalt auswählen oder neu anlegen.</p> : <form onSubmit={event => {
+  }} class="cms-workspace-button cms-workspace-button-primary">＋ Neuer Inhalt</button></header><div class="cms-workspace-statusline"><span><i aria-hidden="true" /> Redaktionsbereich aktiv</span><span>{dirty ? 'Ungespeicherte Änderungen' : 'Gespeicherte Inhalte'}</span></div><p role="status" aria-live="polite" class="music-cms-message">{message}</p>
+  {!collection ? <p>Inhalte werden geladen …</p> : <div class="music-cms-columns"><section class="cms-workspace-card music-cms-collection" aria-label="Inhaltsliste"><details open={showList} onToggle={event => setShowList(event.currentTarget.open)}><summary class="cms-workspace-card-head"><span><strong>Inhalt auswählen</strong>{selected && <small> · {selected.item.title || selected.item.name}</small>}</span><span>{collection.items.length} Einträge ⌄</span></summary><div class="cms-workspace-card-body"><input aria-label="Inhalte filtern" placeholder="Suchen …" value={filter} onInput={event => setFilter(event.currentTarget.value)} /><ul class="music-cms-list">
+    {collection.items.filter(row => String(row.item.title || row.item.name).toLowerCase().includes(filter.toLowerCase())).map(row => <li><button disabled={busy} aria-pressed={row.item.id === selected?.item.id} onClick={() => { if (mayLeave()) { setSelected(row); setShowList(false); setDraft({ ...row.item }); setMessage(''); } }}><strong>{row.item.title || row.item.name}</strong><small>{row.item.language ? String(row.item.language).toUpperCase() + ' · ' : ''}{row.item.type || row.item.slug || `Nr. ${row.item.chapter_number}`}</small>{area === 'books' && <span class={`cms-workspace-pill ${Number(row.item.is_published) ? 'is-on' : ''}`}>{Number(row.item.is_published) ? 'Veröffentlicht' : 'Entwurf'}</span>}</button></li>)}
+  </ul></div></details></section><section class="cms-workspace-card music-cms-editor" aria-label="Inhalt bearbeiten"><div class="cms-workspace-card-body">{!draft ? <p>Inhalt auswählen oder neu anlegen.</p> : <form onSubmit={event => {
     event.preventDefault(); perform(async () => {
       const item = Object.fromEntries(collection.fields.map(f => [f.name, draft[f.name] ?? null]));
       const result = await request(selected ? `${area}/${selected.item.id}` : area, selected ? 'PUT' : 'POST', { item, revision: selected?.revision });
@@ -121,8 +125,15 @@ export function CmsPage() {
         setDraft({ ...draft, [field.name]: result.url }); setMessage('Bild hochgeladen. Zum Zuordnen den Inhalt speichern.');
       });
     }} /></label>}
-    <div class="music-cms-actions"><button type="submit">Speichern</button><button type="button" onClick={() => { if (mayLeave()) { setDraft(null); setSelected(null); } }}>Schließen</button>{selected && <button type="button" onClick={() => {
+    <div class="music-cms-actions"><button type="submit" class="cms-workspace-button cms-workspace-button-primary">Speichern</button><button type="button" onClick={() => { if (mayLeave()) { setDraft(null); setSelected(null); } }}>Schließen</button>{selected && <button type="button" onClick={() => {
       if (window.confirm('Diesen Inhalt dauerhaft löschen? Verknüpfte Inhalte müssen zuvor getrennt werden.')) perform(async () => { await request(`${area}/${selected.item.id}`, 'DELETE', { revision: selected.revision }); setDraft(null); setSelected(null); await load(area); setMessage('Gelöscht.'); });
     }}>Löschen</button>}</div>
-  </fieldset></form>}</section></div>}</main></div>;
+  </fieldset></form>}</div></section><aside class="cms-workspace-card cms-workspace-preview" aria-label="Inhaltsvorschau">
+    <header class="cms-workspace-preview-head"><div><i aria-hidden="true" /><strong>Inhaltsvorschau</strong></div><div class="cms-workspace-devices" role="group" aria-label="Vorschaubreite">
+      <button type="button" class={previewWidth === 'desktop' ? 'is-active' : ''} aria-label="Desktop-Vorschau" aria-pressed={previewWidth === 'desktop'} onClick={() => setPreviewWidth('desktop')}>▱</button>
+      <button type="button" class={previewWidth === 'mobile' ? 'is-active' : ''} aria-label="Mobil-Vorschau" aria-pressed={previewWidth === 'mobile'} onClick={() => setPreviewWidth('mobile')}>▯</button>
+    </div></header>
+    <p class="cms-workspace-preview-note">Gespeicherter Inhalt · Website-Gestaltung{dirty ? ' · Änderungen zuerst speichern' : ''}</p>
+    {selected ? <CmsPreviewFrame area={area} id={selected.item.id!} revision={selected.revision} mobile={previewWidth === 'mobile'} reload={previewReload} title={String(selected.item.title || selected.item.name)} /> : <div class="cms-workspace-preview-area"><p class="music-cms-empty">Wähle einen gespeicherten Inhalt für die Vorschau aus.</p></div>}<footer class="cms-workspace-preview-foot"><span>{selected ? (area === 'books' ? (Number(selected.item.is_published) ? 'Veröffentlicht' : 'Entwurf') : 'Gespeicherter Inhalt') : 'Noch kein Inhalt ausgewählt'}</span><button type="button" disabled={!selected} onClick={() => setPreviewReload(value => value + 1)}>Aktualisieren ↻</button></footer>
+  </aside></div>}<footer class="cms-workspace-footer"><span>FREIBERGER.MUSIC · CMS</span><span>Inhalte pflegen. Geschichten erzählen.</span></footer></main></div></div>;
 }

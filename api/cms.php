@@ -38,6 +38,15 @@ try {
     Auth::requireAdmin();
     require_once $server . '/lib/MusicContent.php';
     $db = Database::getConnection();
+    if ($method === 'GET' && $parts[0] === 'preview' && count($parts) === 3) {
+        $previewTable = $parts[1];
+        if (!in_array($previewTable, MusicContent::TABLES, true) || !ctype_digit($parts[2]) || (int)$parts[2] < 1) errorResponse('Not found', 404);
+        $stmt = $db->prepare("SELECT * FROM $previewTable WHERE id=?");
+        $stmt->execute([(int)$parts[2]]);
+        $item = $stmt->fetch();
+        if (!$item) errorResponse('Not found', 404);
+        jsonResponse(['item' => $item]);
+    }
     $table = $parts[0];
     if (!in_array($table, MusicContent::TABLES, true) || count($parts) > 2) errorResponse('Not found', 404);
     $id = isset($parts[1]) && ctype_digit($parts[1]) && (int)$parts[1] > 0 ? (int)$parts[1] : null;
