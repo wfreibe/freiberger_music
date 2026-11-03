@@ -32,6 +32,8 @@ jobs:
       - run: bash -n scripts/deploy.sh scripts/deploy_remote.sh
       - run: npm run package:deploy
       - run: php tests/deployment-package.test.php
+      - name: Test private preparation without changing the live source
+        run: node --test tests/private-preparation.test.mjs
       - name: Test installed package with synthetic data
         env:
           MUSIC_TEST_PACKAGE: dist-packages/freiberger-music-deploy.zip
@@ -39,7 +41,10 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: deployment-${{ github.sha }}
-          path: dist-packages/freiberger-music-deploy.zip
+          path: |
+            dist-packages/freiberger-music-deploy.zip
+            dist-packages/prepare_private.php
+            dist-packages/prepare-private.sh
           retention-days: 14
           if-no-files-found: error
   production:

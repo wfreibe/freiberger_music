@@ -66,12 +66,48 @@ im Basisverzeichnis und muss bei der späteren Live-Umstellung bewusst geändert
 von freiberger.design übernehmen. Das reguläre Deployment erwartet eine bereits
 initialisierte Installation und verweigert einen fehlenden Datenbestand.
 
-## Einmalige Umstellung – noch nicht ausgeführt
+## Aktuell freigegeben: privater Aufbau ohne zusätzliche Sicherung
 
-Vorher Zielpfad und Domainzuordnung prüfen sowie eine aktuelle Sicherung der vollständigen
-Live-Installation einschließlich Datenbank und Medien erstellen. Schreibzugriffe im alten
-Studio während Kopie/Umstellung stoppen. Einen freien Zielordner mit obiger Struktur
-vorbereiten; der bisherige Webroot bleibt als Rückfallmöglichkeit erhalten.
+Freigabe vom 3. November 2026: neuen Stand privat vorbereiten, keine zusätzliche
+Sicherung erstellen und die bestehende Website unverändert lassen. Das frühere
+Sicherungsskript wird dafür nicht verwendet.
+
+`bin/prepare_private.php` ist ein eigenständiges CLI-Skript. Es prüft die SHA-256-Summe
+des Pakets und seine Einträge, verweigert ein vorhandenes Ziel sowie ein Ziel innerhalb
+des Live-Verzeichnisses und entpackt ausschließlich in ein neues privates Verzeichnis.
+Empfohlenes Vorbereitungsziel: `/kunden/272116_83558/freiberger-music-private`.
+Dieses liegt außerhalb der bestehenden Domainziele. Das neue Verzeichnis erhält auf
+dem Server Modus 0700 und zusätzlich eine HTTP-Sperre. Es ist damit zunächst auch
+für den Webserver nicht als Vorschau freigegeben.
+
+Die aktuelle Live-Datenbank wird ausschließlich lesend geöffnet und als Arbeitsdatenbank
+für den neuen Stand importiert. Aktuell referenzierte lokale Medien werden übernommen.
+Nur diese neue Arbeitskopie erhält die initialen CMS-Migrationen, ohne Sicherungslauf.
+Es werden weder der bisherige Webroot noch Live-Konfiguration, Live-Datenbank oder
+Hosting-Einstellungen überschrieben. Ein Administrator wird nicht automatisch angelegt.
+
+Paket, CLI-Skript und die beim Build erzeugte `prepare-private.sh` werden außerhalb
+des öffentlichen Webroots unter `/kunden/272116_83558/` hochgeladen. Die Shell-Datei
+enthält die SHA-256-Summe genau dieses Pakets und startet die Vorbereitung mit PHP 8.3.
+Bei Fehlern bleibt ein unvollständiges Ziel zur Untersuchung erhalten; es wird nicht
+automatisch entfernt oder überschrieben. Nur ein Lauf mit `PREPARED.json` ist abgeschlossen.
+Während der Vorbereitung keine Inhalte oder Medien im alten Studio bearbeiten.
+
+Erzeugung: `npm run package:deploy`. Lokaler Funktionstest nach dem Build:
+`node --test tests/private-preparation.test.mjs`. Dieser verwendet nur synthetische Daten
+und prüft auch unveränderte Live-Quelldateien, fehlende Sicherungen, Prüfsummenfehler,
+unsichere ZIP-Pfade und das Verbot, vorhandene Ziele zu überschreiben.
+
+Die Arbeitskopie ist eine Momentaufnahme. Vor dem späteren Live-Wechsel müssen etwaige
+neue Studio-Änderungen erneut abgeglichen werden. Die Einrichtung allein aktiviert keine
+Domain, keine PHP-Umstellung und kein Deployment.
+
+## Spätere Live-Umstellung – separat freizugeben
+
+Vorher Zielpfad und Domainzuordnung prüfen und den Rückfallweg zur bisherigen Installation
+festlegen. Eine zusätzliche Sicherung ist derzeit nicht beauftragt. Schreibzugriffe im alten
+Studio während des abschließenden Inhaltsabgleichs und der Umstellung stoppen. Der
+bisherige Webroot bleibt als Rückfallmöglichkeit erhalten.
 
 Das geprüfte Paket dort entpacken. Private Konfiguration aus dem Beispiel erstellen,
 `cookie_secure=true` beibehalten. Die **aktuelle Live-Datenbank** mit
@@ -94,6 +130,12 @@ Environment-Variablen: `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_PATH`, `DEPLOY_PHP`
 Pfadformat wie im Design-Projekt: `/kunden/NUMMER_NUMMER/webseiten/ORDNER`.
 `DEPLOY_PHP` auf die geprüfte PHP-CLI setzen (bei Design `/usr/bin/php83`).
 Ziel-URL ist fest auf `https://freiberger.music` begrenzt.
+
+Am 3. November 2026 eingerichtet und zurückgelesen: Environment `production`,
+Beschränkung auf Branch `master`, erforderliche manuelle Freigabe durch `wfreibe`,
+`DEPLOY_PATH=/kunden/272116_83558/webseiten/freiberger_music` und
+`DEPLOY_PHP=/usr/bin/php83`. SSH-Host, SSH-Benutzer und Deployment-Secrets fehlen
+noch. Es wurde kein `master`-Branch und kein Produktionsdeployment angelegt.
 
 Das Workflow-File alleine richtet weder Repository-Secrets noch Hosting ein.
 Die einmalige Produktionsumstellung und die Einrichtung der Environment-Werte
