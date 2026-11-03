@@ -1,0 +1,69 @@
+name: Test and deploy freiberger.music
+on:
+  push:
+    branches: [development, master]
+  pull_request:
+    branches: [development, master]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: music-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - uses: shivammathur/setup-php@d52fc211a0436f8839a587b3b5b8efddab4744ea
+        with:
+          php-version: '8.3'
+          extensions: pdo_sqlite, gd, mbstring, zip
+          coverage: none
+      - run: npm --prefix frontend ci
+      - run: npm test
+      - name: PHP syntax checks
+        run: find api lib bin -name '*.php' -print0 | xargs -0 -n1 php -l
+      - run: php tests/studio-release.test.php
+      - run: bash -n scripts/deploy.sh scripts/deploy_remote.sh
+      - run: npm run package:deploy
+      - run: php tests/deployment-package.test.php
+      - name: Test installed package with synthetic data
+        env:
+          MUSIC_TEST_PACKAGE: dist-packages/freiberger-music-deploy.zip
+        run: node --test tests/cms.test.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: deployment-${{ github.sha }}
+          path: dist-packages/freiberger-music-deploy.zip
+          retention-days: 14
+          if-no-files-found: error
+  production:
+    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
+    needs: verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment:
+      name: production
+      url: https://freiberger.music
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: deployment-${{ github.sha }}
+          path: dist-packages
+      - name: Deploy verified application
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+          DEPLOY_PHP: ${{ vars.DEPLOY_PHP }}
+          DEPLOY_URL: https://freiberger.music
+          RELEASE_ID: ${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+        run: bash scripts/deploy.sh

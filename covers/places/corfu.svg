@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="100%" height="100%">
+  <defs>
+    <radialGradient id="glow-corfu" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#457b9d" stop-opacity="0.25" />
+      <stop offset="65%" stop-color="#457b9d" stop-opacity="0.05" />
+      <stop offset="100%" stop-color="#0b0c0e" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0e1116" />
+      <stop offset="100%" stop-color="#07080a" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="800" height="600" fill="url(#bgGrad)" />
+  <rect width="800" height="600" fill="url(#glow-corfu)" />
+
+  <!-- Grid Accents & Framing -->
+  <rect x="24" y="24" width="752" height="552" fill="none" stroke="#457b9d" stroke-width="1" opacity="0.2" rx="4" />
+  <circle cx="24" cy="24" r="3" fill="#457b9d" opacity="0.6" />
+  <circle cx="776" cy="24" r="3" fill="#457b9d" opacity="0.6" />
+  <circle cx="24" cy="576" r="3" fill="#457b9d" opacity="0.6" />
+  <circle cx="776" cy="576" r="3" fill="#457b9d" opacity="0.6" />
+
+  <!-- Coordinates & Superheader -->
+  <text x="400" y="75" text-anchor="middle" fill="#457b9d" font-family="'Cinzel', 'Trajan Pro', 'Georgia', serif" font-size="12" letter-spacing="4" opacity="0.9">39.624° N, 19.921° E</text>
+  <text x="400" y="98" text-anchor="middle" fill="#7a8291" font-family="'Inter', sans-serif" font-size="10" letter-spacing="3" text-transform="uppercase">FREIBERGER ARCHIV · SCHAUPLATZ</text>
+
+  <!-- Central Motif -->
+  <!-- Venetian Arch & Northern Horizon Motif -->
+      <path d="M 270 360 L 270 240 C 270 170, 530 170, 530 240 L 530 360" fill="none" stroke="#457b9d" stroke-width="8" stroke-linecap="round" opacity="0.9" />
+      <!-- Cypress silhouettes -->
+      <polygon points="400,160 388,270 412,270" fill="#457b9d" opacity="0.8" />
+      <polygon points="360,200 352,280 368,280" fill="#457b9d" opacity="0.6" />
+      <polygon points="440,200 432,280 448,280" fill="#457b9d" opacity="0.6" />
+      <line x1="230" y1="360" x2="570" y2="360" stroke="#457b9d" stroke-width="6" stroke-linecap="round" />
+
+  <!-- Typography & Place Identity -->
+  <text x="400" y="470" text-anchor="middle" fill="#f0ece1" font-family="'Cinzel', 'Trajan Pro', 'Georgia', serif" font-size="34" font-weight="600" letter-spacing="8">CORFU</text>
+  <text x="400" y="500" text-anchor="middle" fill="#457b9d" font-family="'Cinzel', 'GFS Didot', serif" font-size="16" letter-spacing="6" opacity="0.85">Κέρκυρα</text>
+  <text x="400" y="534" text-anchor="middle" fill="#9ca3af" font-family="'Inter', sans-serif" font-size="12" letter-spacing="2" font-style="italic">Der grüne Norden</text>
+</svg>

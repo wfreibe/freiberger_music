@@ -1,0 +1,22 @@
+{
+  "name": "freiberger-music-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node ../scripts/dev-server.mjs",
+    "build": "tsc && vite build",
+    "package": "npm run build && node ../scripts/package-deploy.mjs",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@preact/signals": "^1.2.2",
+    "preact": "^10.19.6"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.6",
+    "archiver": "^8.0.0",
+    "typescript": "^5.3.3",
+    "vite": "^6.4.3"
+  }
+}

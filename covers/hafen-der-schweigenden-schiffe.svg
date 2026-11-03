@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">
+  <defs>
+    <linearGradient id="rhodesBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0e1014"/>
+      <stop offset="100%" stop-color="#181512"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="800" fill="url(#rhodesBg)"/>
+  <!-- Harbor Masts & Stone Ramparts -->
+  <line x1="340" y1="240" x2="340" y2="480" stroke="#e8e5de" stroke-opacity="0.4" stroke-width="2"/>
+  <line x1="460" y1="280" x2="460" y2="480" stroke="#e8e5de" stroke-opacity="0.3" stroke-width="2"/>
+  <path d="M 260 480 Q 400 520 540 480" fill="none" stroke="#e0a96d" stroke-width="2"/>
+  <text x="400" y="660" font-family="-apple-system, sans-serif" font-size="14" font-weight="600" letter-spacing="8" fill="#e8e5de" text-anchor="middle">FREIBERGER</text>
+  <text x="400" y="690" font-family="-apple-system, sans-serif" font-size="11" letter-spacing="4" fill="#e0a96d" text-anchor="middle">HAFEN DER SCHWEIGENDEN SCHIFFE</text>
+</svg>

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0c0e12"/>
+      <stop offset="100%" stop-color="#161b22"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="800" fill="url(#bg2)"/>
+  <!-- The Portara Marble Frame -->
+  <rect x="280" y="240" width="240" height="320" fill="none" stroke="#e8e5de" stroke-width="12" stroke-opacity="0.85"/>
+  <rect x="250" y="220" width="300" height="24" fill="#e8e5de" fill-opacity="0.9"/>
+  <!-- Sea horizon inside the frame -->
+  <line x1="280" y1="420" x2="520" y2="420" stroke="#387780" stroke-width="2"/>
+  <circle cx="400" cy="380" r="30" fill="none" stroke="#d4b483" stroke-width="1"/>
+  <circle cx="400" cy="380" r="4" fill="#d4b483"/>
+  <text x="400" y="660" font-family="-apple-system, sans-serif" font-size="14" font-weight="600" letter-spacing="8" fill="#e8e5de" text-anchor="middle">FREIBERGER</text>
+  <text x="400" y="690" font-family="-apple-system, sans-serif" font-size="11" letter-spacing="4" fill="#d4b483" text-anchor="middle">THE PORTARA MIRROR</text>
+</svg>

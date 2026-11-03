@@ -1,0 +1,26 @@
+.music-cms { color: #001730; background: #fff; font: 14px/1.5 system-ui, sans-serif; min-height: 100vh; letter-spacing: normal; }
+.music-cms *, .music-cms *::before, .music-cms *::after { box-sizing: border-box; }
+.music-cms button, .music-cms input, .music-cms select, .music-cms textarea { font: inherit; color: #001730; background: #fff; border: 1px solid #bbc5cb; border-radius: 5px; padding: 10px; }
+.music-cms button { cursor: pointer; }
+.music-cms button:disabled { opacity: .5; cursor: wait; }
+.music-cms button[aria-pressed=true], .music-cms button.is-selected { background: #eef3f6; border-color: #001730; }
+.music-cms a { color: #001730; display: inline-block; padding: 12px; }
+.music-cms h1, .music-cms h2 { color: #001730; font-family: inherit; letter-spacing: normal; margin: 0 0 16px; }
+.music-cms-main { padding: 32px; min-width: 0; }
+.music-cms-main header { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+.music-cms-columns { display: grid; grid-template-columns: minmax(200px, 1fr) minmax(260px, 2fr); gap: 32px; }
+.music-cms label { display: grid; gap: 5px; margin-bottom: 16px; }
+.music-cms label input, .music-cms label select, .music-cms label textarea { width: 100%; }
+.music-cms fieldset { border: 0; padding: 0; margin: 0; }
+.music-cms-list { list-style: none; margin: 16px 0; padding: 0; max-height: 75vh; overflow-y: auto; }
+.music-cms-list button { width: 100%; text-align: left; margin-bottom: 8px; }
+.music-cms-list small { display: block; }
+.music-cms-actions { display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 24px; }
+.music-cms-login { width: min(420px, 100%); padding: 32px; margin: auto; }
+.music-cms.cms-login-page { display: grid; grid-template-columns: 1fr; place-items: center; }
+.music-cms .cms-workspace-brand { padding: 20px 10px; }
+.music-cms .cms-workspace-brand small { display: block; }
+.music-cms .cms-workspace-nav-item.is-selected { color: #001730; }
+.music-cms .cms-workspace-sidebar a { color: #fff; }
+body:has(.music-cms) { margin: 0; }
+@media(max-width: 800px) { .music-cms.cms-workspace { grid-template-columns: 1fr; } .music-cms .cms-workspace-sidebar { position: static; height: auto; min-height: 0; } .music-cms-columns { grid-template-columns: 1fr; } .music-cms-main { padding: 20px; } .music-cms-list { max-height: 30vh; } }

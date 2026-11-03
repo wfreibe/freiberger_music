@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">
+  <defs>
+    <linearGradient id="kerosBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090d10"/>
+      <stop offset="100%" stop-color="#101820"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="800" fill="url(#kerosBg)"/>
+  <!-- Sacred marble idol minimalist curve -->
+  <path d="M 400 240 Q 360 360 400 480 Q 440 360 400 240 Z" fill="#e8e5de" fill-opacity="0.08" stroke="#387780" stroke-width="1.5"/>
+  <circle cx="400" cy="300" r="18" fill="none" stroke="#e8e5de" stroke-opacity="0.3" stroke-width="1"/>
+  <line x1="260" y1="480" x2="540" y2="480" stroke="#387780" stroke-opacity="0.5" stroke-width="1"/>
+  <text x="400" y="660" font-family="-apple-system, sans-serif" font-size="14" font-weight="600" letter-spacing="8" fill="#e8e5de" text-anchor="middle">FREIBERGER</text>
+  <text x="400" y="690" font-family="-apple-system, sans-serif" font-size="11" letter-spacing="4" fill="#387780" text-anchor="middle">LICHT ÜBER KEROS</text>
+</svg>

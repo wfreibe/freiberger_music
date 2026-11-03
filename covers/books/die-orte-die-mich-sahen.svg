@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1100" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bookBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0e1013"/>
+      <stop offset="60%" stop-color="#15181e"/>
+      <stop offset="100%" stop-color="#0a0c0e"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="1100" fill="url(#bookBg)"/>
+  <!-- Elegant geometric lines -->
+  <line x1="80" y1="120" x2="720" y2="120" stroke="#e8e5de" stroke-opacity="0.1" stroke-width="1"/>
+  <line x1="80" y1="980" x2="720" y2="980" stroke="#e8e5de" stroke-opacity="0.1" stroke-width="1"/>
+  
+  <text x="400" y="240" font-family="-apple-system, sans-serif" font-size="14" font-weight="600" letter-spacing="12" fill="#d4b483" text-anchor="middle">WERNER FREIBERGER</text>
+  
+  <text x="400" y="440" font-family="-apple-system, sans-serif" font-size="44" font-weight="500" letter-spacing="2" fill="#e8e5de" text-anchor="middle">DIE ORTE,</text>
+  <text x="400" y="500" font-family="-apple-system, sans-serif" font-size="44" font-weight="500" letter-spacing="2" fill="#e8e5de" text-anchor="middle">DIE MICH SAHEN</text>
+  
+  <line x1="320" y1="560" x2="480" y2="560" stroke="#387780" stroke-width="2"/>
+  
+  <text x="400" y="620" font-family="-apple-system, sans-serif" font-size="16" font-style="italic" letter-spacing="3" fill="#9e9b93" text-anchor="middle">Als die Zukunft noch keinen Namen hatte</text>
+  
+  <circle cx="400" cy="740" r="40" fill="none" stroke="#e8e5de" stroke-opacity="0.2" stroke-width="1"/>
+  <circle cx="400" cy="740" r="4" fill="#d4b483"/>
+  
+  <text x="400" y="920" font-family="-apple-system, sans-serif" font-size="12" letter-spacing="6" fill="#54524e" text-anchor="middle">11 KAPITEL · 11 ORTE · 11 SONGS</text>
+</svg>

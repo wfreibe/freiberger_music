@@ -1,0 +1,32 @@
+export const catalogCopy = {
+  de: {
+    title: 'Musik & Hörbücher', intro: 'Songs, Musikvideos und Geschichten zum Hören. Entdecke alle Veröffentlichungen von FREIBERGER und GARD 7.',
+    featured: 'Zum Einstieg', all: 'Alle', music: 'Musik', audiobook: 'Hörbücher',
+    collection: 'Alle Veröffentlichungen', language: 'Sprache des Inhalts', allLanguages: 'Alle Sprachen',
+    de: 'Deutsch', en: 'Englisch', fr: 'Französisch', instrumental: 'Instrumental', unknown: 'Sprache nicht zugeordnet',
+    search: 'Titel oder Ort suchen', results: 'Ergebnisse', empty: 'Keine passenden Titel gefunden.',
+    reset: 'Filter zurücksetzen', loading: 'Veröffentlichungen werden geladen…',
+    error: 'Ein Teil der Veröffentlichungen konnte nicht geladen werden. Die englischen Songs sind weiterhin verfügbar.', retry: 'Erneut laden',
+    play: 'Abspielen', playing: 'Spielt',
+  },
+  en: {
+    title: 'Music & Audiobooks', intro: 'Songs, music videos and stories to listen to. Explore all releases by FREIBERGER and GARD 7.',
+    featured: 'Start listening', all: 'All', music: 'Music', audiobook: 'Audiobooks',
+    collection: 'All releases', language: 'Content language', allLanguages: 'All languages',
+    de: 'German', en: 'English', fr: 'French', instrumental: 'Instrumental', unknown: 'Language not assigned',
+    search: 'Search by title or place', results: 'results', empty: 'No matching titles found.',
+    reset: 'Reset filters', loading: 'Loading releases…',
+    error: 'Some releases could not be loaded. The English songs are still available.', retry: 'Try again',
+    play: 'Play', playing: 'Playing',
+  },
+  fr: {
+    title: 'Musique & livres audio', intro: 'Chansons, clips et histoires à écouter. Découvrez toutes les publications de FREIBERGER et GARD 7.',
+    featured: 'Pour commencer', all: 'Tout', music: 'Musique', audiobook: 'Livres audio',
+    collection: 'Toutes les publications', language: 'Langue du contenu', allLanguages: 'Toutes les langues',
+    de: 'Allemand', en: 'Anglais', fr: 'Français', instrumental: 'Instrumental', unknown: 'Langue non renseignée',
+    search: 'Rechercher un titre ou un lieu', results: 'résultats', empty: 'Aucun titre correspondant.',
+    reset: 'Réinitialiser les filtres', loading: 'Chargement des publications…',
+    error: 'Certaines publications n’ont pas pu être chargées. Les chansons en anglais restent disponibles.', retry: 'Réessayer',
+    play: 'Écouter', playing: 'En lecture',
+  },
+} as const;

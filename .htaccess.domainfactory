@@ -1,0 +1,44 @@
+# freiberger.music — Apache Web Server Configuration for DomainFactory
+DirectoryIndex index.php index.html
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Block access to hidden files, sqlite database and schema
+    RewriteRule ^storage/.*$ - [F,L]
+    RewriteRule ^(\.git|\.env|.*\.sql|.*\.sqlite)$ - [F,L]
+
+    # Allow ACME / Let's Encrypt validation checks without redirecting
+    RewriteRule ^\.well-known/acme-challenge/ - [L]
+
+    # Force HTTPS redirect (Automatische Weiterleitung auf https://)
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{ENV:HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+    RewriteRule ^studio(?:/.*)?$ /cms [R=302,L]
+    RewriteRule ^api(?:/.*)?$ api/index.php [QSA,L]
+
+    # Allow direct access to existing files and folders (assets, covers, mp3s)
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # SPA Fallback: Route all other frontend requests to index.php (with dynamic OpenGraph and crawler pre-rendering)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} !(api|storage) [NC]
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Security Headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    Header set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+    Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.youtube.com https://s.ytimg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://i.ytimg.com https://img.youtube.com; frame-src https://www.youtube-nocookie.com https://www.youtube.com; media-src 'self' data: blob:; connect-src 'self';"
+</IfModule>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="100%" height="100%">
+  <defs>
+    <radialGradient id="glow-kos" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#569eab" stop-opacity="0.25" />
+      <stop offset="65%" stop-color="#569eab" stop-opacity="0.05" />
+      <stop offset="100%" stop-color="#0b0c0e" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0e1116" />
+      <stop offset="100%" stop-color="#07080a" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="800" height="600" fill="url(#bgGrad)" />
+  <rect width="800" height="600" fill="url(#glow-kos)" />
+
+  <!-- Grid Accents & Framing -->
+  <rect x="24" y="24" width="752" height="552" fill="none" stroke="#569eab" stroke-width="1" opacity="0.2" rx="4" />
+  <circle cx="24" cy="24" r="3" fill="#569eab" opacity="0.6" />
+  <circle cx="776" cy="24" r="3" fill="#569eab" opacity="0.6" />
+  <circle cx="24" cy="576" r="3" fill="#569eab" opacity="0.6" />
+  <circle cx="776" cy="576" r="3" fill="#569eab" opacity="0.6" />
+
+  <!-- Coordinates & Superheader -->
+  <text x="400" y="75" text-anchor="middle" fill="#569eab" font-family="'Cinzel', 'Trajan Pro', 'Georgia', serif" font-size="12" letter-spacing="4" opacity="0.9">36.893° N, 27.287° E</text>
+  <text x="400" y="98" text-anchor="middle" fill="#7a8291" font-family="'Inter', sans-serif" font-size="10" letter-spacing="3" text-transform="uppercase">FREIBERGER ARCHIV · SCHAUPLATZ</text>
+
+  <!-- Central Motif -->
+  <!-- Asklepieion Rod & Wind Vortex Motif -->
+      <line x1="400" y1="140" x2="400" y2="360" stroke="#569eab" stroke-width="8" stroke-linecap="round" />
+      <circle cx="400" cy="130" r="14" fill="#569eab" />
+      <path d="M 400 170 C 460 200, 460 240, 400 260 C 340 280, 340 320, 400 340" fill="none" stroke="#569eab" stroke-width="5" stroke-linecap="round" opacity="0.85" />
+      <path d="M 220 310 Q 310 270, 400 310 T 580 310" fill="none" stroke="#569eab" stroke-width="3" opacity="0.4" />
+      <path d="M 250 350 Q 320 330, 400 350 T 550 350" fill="none" stroke="#569eab" stroke-width="2" opacity="0.25" />
+
+  <!-- Typography & Place Identity -->
+  <text x="400" y="470" text-anchor="middle" fill="#f0ece1" font-family="'Cinzel', 'Trajan Pro', 'Georgia', serif" font-size="34" font-weight="600" letter-spacing="8">KOS</text>
+  <text x="400" y="500" text-anchor="middle" fill="#569eab" font-family="'Cinzel', 'GFS Didot', serif" font-size="16" letter-spacing="6" opacity="0.85">Κως</text>
+  <text x="400" y="534" text-anchor="middle" fill="#9ca3af" font-family="'Inter', sans-serif" font-size="12" letter-spacing="2" font-style="italic">Insel des Windes</text>
+</svg>

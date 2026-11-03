@@ -1,0 +1,180 @@
+{
+  "de": {
+    "playlist": "PLYjciFHvZoyU",
+    "videos": [
+      {
+        "id": "I2ZmUlL5JWw",
+        "title": "01 Die Stadt Über der Stadt, Hörbuch",
+        "duration": "13:54",
+        "index": 12,
+        "chapter": 1
+      },
+      {
+        "id": "urRrHeHx3MM",
+        "title": "02 Jung genug dem Horizont zu glauben, Hörbuch",
+        "duration": "12:39",
+        "index": 11,
+        "chapter": 2
+      },
+      {
+        "id": "VLXu_1GVqn0",
+        "title": "03 Grün das keinen Horizont brauchte, Hörbuch",
+        "duration": "9:54",
+        "index": 10,
+        "chapter": 3
+      },
+      {
+        "id": "GrMC4veUf54",
+        "title": "04 Die Ader hinaus in die Welt, Hörbuch",
+        "duration": "9:51",
+        "index": 9,
+        "chapter": 4
+      },
+      {
+        "id": "mMTEOXCLV-w",
+        "title": "05 Stimmen unter freiem Himmel, Hörbuch",
+        "duration": "13:28",
+        "index": 8,
+        "chapter": 5
+      },
+      {
+        "id": "8uwf-8kQZDI",
+        "title": "06 Wir hielten uns fuer unsterblich, Hörbuch",
+        "duration": "11:53",
+        "index": 7,
+        "chapter": 6
+      },
+      {
+        "id": "HWdVFh4Iq_Y",
+        "title": "07 Drei Motoren unter einem jungen Himmel, Hörbuch",
+        "duration": "11:51",
+        "index": 6,
+        "chapter": 7
+      },
+      {
+        "id": "CPVQnyswU3k",
+        "title": "08 Die Hand die bleibt, Hörbuch",
+        "duration": "10:57",
+        "index": 5,
+        "chapter": 8
+      },
+      {
+        "id": "JkwbHZNVkBQ",
+        "title": "09 Das Tor das uns wiedersah, Hörbuch",
+        "duration": "10:58",
+        "index": 4,
+        "chapter": 9
+      },
+      {
+        "id": "bAA6AuI6dlE",
+        "title": "10 Vor dem ersten Schlag, Hörbuch",
+        "duration": "9:42",
+        "index": 3,
+        "chapter": 10
+      },
+      {
+        "id": "qpP2dMpT_q4",
+        "title": "11 Zwei Flaschen auf einem Tisch, Hörbuch",
+        "duration": "10:01",
+        "index": 2,
+        "chapter": 11
+      },
+      {
+        "id": "lxnDT15eI5c",
+        "title": "12 Epilog Was das Meer bewahrte, Hörbuch",
+        "duration": "7:14",
+        "index": 1,
+        "chapter": 12
+      }
+    ]
+  },
+  "fr": {
+    "playlist": "PLbf_CjWtjwr0",
+    "videos": [
+      {
+        "id": "CdtL5RiTg8s",
+        "title": "01 La ville au-dessus de la ville, livre audio",
+        "duration": "12:35",
+        "index": 11,
+        "chapter": 1
+      },
+      {
+        "id": "CU29i6BgdBA",
+        "title": "02 Assez jeune pour croire à l'horizon, livre audio",
+        "duration": "11:37",
+        "index": 10,
+        "chapter": 2
+      },
+      {
+        "id": "5LQCHyfnoGE",
+        "title": "03 Un vert qui n'avait pas besoin d'horizon, livre audio",
+        "duration": "9:00",
+        "index": 9,
+        "chapter": 3
+      },
+      {
+        "id": "_b-_FC8MZSA",
+        "title": "04 L'artère vers le large, livre audio",
+        "duration": "8:53",
+        "index": 8,
+        "chapter": 4
+      },
+      {
+        "id": "JW-mJ794tj4",
+        "title": "05 Des voix sous le ciel, livre audio",
+        "duration": "12:20",
+        "index": 7,
+        "chapter": 5
+      },
+      {
+        "id": "FJ2T3OxUXkI",
+        "title": "06 Nous nous croyions immortels, livre audio",
+        "duration": "10:43",
+        "index": 6,
+        "chapter": 6
+      },
+      {
+        "id": "Ky4fEXpgXFI",
+        "title": "07 Trois moteurs sous un ciel encore jeune, livre audio",
+        "duration": "10:56",
+        "index": 5,
+        "chapter": 7
+      },
+      {
+        "id": "UgK_Cbzeh5c",
+        "title": "08 La main qui reste, livre audio",
+        "duration": "10:02",
+        "index": 4,
+        "chapter": 8
+      },
+      {
+        "id": "eo_oUePaY-Y",
+        "title": "09 La porte qui nous a vus revenir, livre audio",
+        "duration": "9:57",
+        "index": 3,
+        "chapter": 9
+      },
+      {
+        "id": "8_8XOOE7G3A",
+        "title": "10 Avant le premier battement, livre audio",
+        "duration": "8:34",
+        "index": 2,
+        "chapter": 10
+      },
+      {
+        "id": "NyMxu-8f6Tk",
+        "title": "11 Deux bouteilles sur une table, livre audio",
+        "duration": "9:24",
+        "index": 1,
+        "chapter": 11
+      },
+      {
+        "id": "yZN8i-Ch2ME",
+        "title": "12 Ce que la mer a gardé, livre audio",
+        "duration": "6:36",
+        "index": 12,
+        "chapter": 12
+      }
+    ]
+  }
+}
