@@ -60,3 +60,18 @@ test('book film uses a validated video and its own player identity', () => {
   assert.equal(bookFilm(book(1)),null);
   assert.equal(bookFilm({...filmBook,film_youtube_id:'https://untrusted.example/video'}),null);
 });
+
+test('content module helpers reject unsafe media and preserve sorting inputs', async () => {
+  const result=await build({entryPoints:[fileURLToPath(new URL('../frontend/src/utils/contentBlocks.js',import.meta.url))],bundle:true,platform:'node',format:'esm',write:false});
+  const utils=await import('data:text/javascript;base64,'+Buffer.from(result.outputFiles[0].text).toString('base64'));
+  assert.equal(utils.youtubeId('https://youtu.be/rnweaIuC_-Y'),'rnweaIuC_-Y');
+  assert.equal(utils.youtubeId('https://evil.example/watch?v=rnweaIuC_-Y'),'');
+  assert.equal(utils.localImage('/api/media/'+ 'a'.repeat(48)+'.webp'),true);
+  assert.equal(utils.localImage('//evil.example/a.jpg'),false);
+  assert.equal(utils.localAudio('/files/test.mp3'),true);
+  assert.equal(utils.localAudio('/files/%2e%2e/test.mp3'),false);
+  assert.equal(utils.safeBlockLink('javascript:alert(1)'),'');
+  assert.deepEqual(utils.pageBlocks(null),[{id:'existing-content',type:'legacy',enabled:true,data:{}}]);
+  assert.deepEqual(utils.pageBlocks('[]'),[]);
+  const before=[{id:'a'},{id:'b'}];assert.deepEqual(utils.moveBlock(before,1,0).map(b=>b.id),['b','a']);assert.equal(before[0].id,'a');
+});

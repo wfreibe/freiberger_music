@@ -1,6 +1,7 @@
 export type ReleaseType = 'film' | 'song' | 'audiobook' | 'single' | 'ep' | 'album' | 'chapter_audio' | 'gard7';
 
 export interface Release {
+  content_blocks?: string | unknown[] | null;
   id: number;
   slug: string;
   title: string;
@@ -21,6 +22,7 @@ export interface Release {
   place_name?: string | null;
   place_slug?: string | null;
   place_accent?: string | null;
+  chapter_content_blocks?: string | unknown[] | null;
   chapter_id?: number | null;
   chapter_title?: string | null;
   chapter_number?: number | null;
@@ -34,6 +36,7 @@ export interface Release {
 }
 
 export interface Place {
+  content_blocks?: string | unknown[] | null;
   id: number;
   slug: string;
   name: string;
@@ -51,6 +54,7 @@ export interface Place {
 }
 
 export interface Book {
+  content_blocks?: string | unknown[] | null;
   id: number;
   slug: string;
   title: string;
@@ -79,6 +83,7 @@ export interface Book {
 }
 
 export interface Chapter {
+  content_blocks?: string | unknown[] | null;
   id: number;
   book_id?: number | null;
   chapter_number: number;
@@ -100,6 +105,7 @@ export interface Chapter {
 }
 
 export interface Series {
+  content_blocks?: string | unknown[] | null;
   id: number;
   slug: string;
   title: string;
@@ -107,3 +113,5 @@ export interface Series {
   sort_order?: number;
   releases?: Release[];
 }
+
+export interface CmsPageContent extends Book { parent_id?: number | null; }

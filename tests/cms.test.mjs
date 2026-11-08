@@ -138,6 +138,50 @@ test('CMS migration, secure authentication and music CRUD with isolated syntheti
   }
   await request(`cms/books/${enBook.item.id}`, 'PUT', { item: { is_published: 1, slug: 'custom-english-book' }, revision: draft.revision });
   assert.equal((await request('books/custom-english-book')).data.language, 'en');
+  const savedTitle = (await request('books/custom-english-book')).data.title;
+  await request('cms/preview', 'POST', {area:'books',id:enBook.item.id,item:{title:'Unsaved preview'}},403,'wrong');
+  const unsaved = await request('cms/preview', 'POST', {area:'books',id:enBook.item.id,item:{title:'Unsaved preview'}});
+  assert.equal(unsaved.data.item.title,'Unsaved preview');
+  assert.equal((await request('books/custom-english-book')).data.title,savedTitle,'Preview never saves');
+  const blocks=[{id:'text-1',type:'text',enabled:true,data:{title:'Intro',html:'<p onclick="bad()">Allowed <strong>bold</strong><script>alert(1)</script><a href="javascript:alert(1)">link</a></p>'}},{id:'hidden',type:'text',enabled:false,data:{html:'PRIVATE-BLOCK-TEXT'}},{id:'old',type:'legacy',enabled:true,data:{}}];
+  const page=(await request('cms/pages','POST',{item:{title:'Müller & Söhne',description:'Preserved original description',language:'de',is_published:1,show_in_navigation:1,content_blocks:JSON.stringify(blocks)}},201)).data;
+  assert.equal(page.item.slug,'mueller-soehne');
+  const published=(await request('pages/mueller-soehne')).data;
+  assert.deepEqual(published.content_blocks.map(b=>b.id),['text-1','old']);
+  assert.ok(published.content_blocks[0].data.html.includes('<strong>bold</strong>'));
+  assert.doesNotMatch(JSON.stringify(published),/onclick|<script|javascript:|PRIVATE-BLOCK-TEXT/);
+  const child=(await request('cms/pages','POST',{item:{title:'Child',slug:'child-page',language:'de',parent_id:page.item.id}},201)).data;
+  await request(`cms/pages/${page.item.id}`,'PUT',{item:{language:'fr'},revision:page.revision},400);
+  await request(`cms/pages/${page.item.id}`,'PUT',{item:{parent_id:child.item.id},revision:page.revision},400);
+  await request(`cms/pages/${child.item.id}`,'PUT',{item:{language:'fr'},revision:child.revision},400);
+  await request('cms/pages','POST',{item:{title:'Reserved',slug:'cms'}},400);
+  for (const block of [
+    {id:'image',type:'image',enabled:true,data:{src:'/covers/test.svg',html:'<p>Image copy</p>',options:{format:'16:9',layout:'beside',align:'right',width:75,focus_x:30,focus_y:50}}},
+    {id:'slides',type:'slideshow',enabled:true,data:{interval:3,images:[{src:'/covers/test.svg',title:'Slide',caption:'Caption'}]}},
+    {id:'accordion',type:'accordion',enabled:true,data:{items:[{id:'topic',title:'Topic',html:'<p>Answer</p>',enabled:true}]}},
+    {id:'video',type:'youtube',enabled:true,data:{video:'https://youtu.be/rnweaIuC_-Y'}},
+    {id:'audio',type:'audio',enabled:true,data:{src:'/files/test.mp3'}},
+    {id:'link',type:'link',enabled:true,data:{href:'https://example.com/book',label:'Read'}}
+  ]) {
+    const checked=await request('cms/preview','POST',{area:'pages',id:page.item.id,item:{content_blocks:JSON.stringify([block])}});
+    assert.equal(JSON.parse(checked.data.item.content_blocks)[0].type,block.type);
+  }
+  assert.equal((await request('cms/preview/pages/'+page.item.id)).data.item.content_blocks,page.item.content_blocks,'Module previews never save');
+  const badBlocks=[{id:'bad',type:'youtube',enabled:true,data:{video:'https://evil.example/embed/foo'}}];
+  await request(`cms/pages/${page.item.id}`,'PUT',{item:{content_blocks:JSON.stringify(badBlocks)},revision:page.revision},400);
+  const renamed=(await request(`cms/pages/${page.item.id}`,'PUT',{item:{slug:'renamed-page'},revision:page.revision})).data;
+  assert.equal(renamed.item.content_blocks,page.item.content_blocks,'Partial updates preserve blocks');
+  await request('cms/pages','POST',{item:{title:'Reuse',slug:'mueller-soehne'}},400);
+  if(process.env.MUSIC_TEST_PACKAGE){
+    const old=await fetch(`http://127.0.0.1:${port}/mueller-soehne`,{redirect:'manual'});assert.equal(old.status,301);assert.equal(old.headers.get('location'),'/renamed-page');
+    const html=await fetch(`http://127.0.0.1:${port}/renamed-page`);assert.equal(html.status,200);assert.match(await html.text(),/Müller/);
+  }
+  const cleared=(await request(`cms/pages/${page.item.id}`,'PUT',{item:{content_blocks:'[]'},revision:renamed.revision})).data;
+  assert.deepEqual((await request('pages/renamed-page')).data.content_blocks,[]);
+  assert.equal(cleared.item.description,'Preserved original description');
+  assert.equal((await request('pages/renamed-page')).data.description,null);
+  if(process.env.MUSIC_TEST_PACKAGE){const hiddenHtml=await fetch(`http://127.0.0.1:${port}/renamed-page`);assert.doesNotMatch(await hiddenHtml.text(),/Preserved original description/);}
+  await request('cms/preview','POST',{area:'admin_credentials',item:{}},400);
   await request('cms/logout', 'POST', {});
   await request('cms/releases', 'GET', undefined, 401);
   await request('cms/preview/books/1', 'GET', undefined, 401);

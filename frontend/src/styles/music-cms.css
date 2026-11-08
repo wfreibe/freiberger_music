@@ -54,3 +54,6 @@ body:has(.music-cms) { margin:0; }
 
 .music-cms summary.cms-workspace-card-head { cursor:pointer; list-style:none; }
 .music-cms summary.cms-workspace-card-head small { font-size:12px; color:#526875; }
+
+.music-cms-field-group{border:1px solid #dce5e9;border-radius:6px;margin:0 0 16px;padding:12px}.music-cms-field-group>summary{cursor:pointer;font-weight:600;padding:4px 0 12px}.music-cms-preview-mode{display:flex;gap:8px;padding:0 16px 12px}.music-cms-preview-mode button{border:1px solid #bbcbd3;background:#fff;color:#001730;padding:8px;border-radius:4px;font-size:11px}.music-cms-preview-mode button[aria-pressed=true]{background:#001730;color:#fff}
+.music-cms .block-editor-bar{flex-wrap:wrap}.music-cms .block-editor-fields{padding:12px}.music-cms .rich-editable{min-height:160px;border:1px solid #bbcbd3;padding:12px;background:white}.music-cms .rich-text-toolbar{display:flex;flex-wrap:wrap;gap:4px}.music-cms .rich-format-label{max-width:150px}.music-cms .rich-editor-hint{font-size:12px}.music-cms .block-item-editor{border:1px solid #dce5e9;padding:12px;margin:12px 0}

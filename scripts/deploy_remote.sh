@@ -43,6 +43,7 @@ if (!$zip->extractTo($argv[2])) exit(1);
 test -f "$base/server/config/cms_config.php"
 # This deployment is for the existing installation, never a fresh/empty database.
 "$php" -r '
+if (!class_exists("DOMDocument")) {fwrite(STDERR,"PHP DOM extension required for CMS blocks.\n");exit(1);}
 require $argv[1]."/server/lib/Database.php";
 $c=Database::getConfig();
 if (($c["db_path"] ?? "") !== $argv[1]."/server/data/content.sqlite" || !is_file($c["db_path"]) || empty($c["cookie_secure"])) exit(1);

@@ -18,8 +18,8 @@ try {
     if ($method !== 'GET') {
         Auth::requireCsrf();
         if (strpos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== 0) errorResponse('JSON required', 415);
-        $raw = file_get_contents('php://input', false, null, 0, 262145);
-        if (strlen($raw) > 262144) errorResponse('Request too large', 413);
+        $raw = file_get_contents('php://input', false, null, 0, 524289);
+        if (strlen($raw) > 524288) errorResponse('Request too large', 413);
         $data = json_decode($raw, true, 32, JSON_THROW_ON_ERROR);
         if (!is_array($data)) errorResponse('JSON object required');
     }
@@ -46,6 +46,18 @@ try {
         $item = $stmt->fetch();
         if (!$item) errorResponse('Not found', 404);
         jsonResponse(['item' => $item]);
+    }
+    if ($method === 'POST' && $route === 'preview') {
+        $table = $data['area'] ?? '';
+        if (!is_string($table) || !in_array($table, MusicContent::TABLES, true) || !is_array($data['item'] ?? null)) errorResponse('Ungültige Vorschau.');
+        $id = $data['id'] ?? null; $existing=[];
+        if ($id !== null) {
+            if (!is_int($id) || $id < 1) errorResponse('Ungültige Vorschau.');
+            $stmt=$db->prepare("SELECT * FROM $table WHERE id=?"); $stmt->execute([$id]); $existing=$stmt->fetch();
+            if (!$existing) errorResponse('Not found',404);
+        }
+        $item=MusicContent::validate($db,$table,array_replace(array_intersect_key($existing,array_flip(array_column(MusicContent::fields($db,$table),'name'))),$data['item']));
+        jsonResponse(['item'=>array_replace($existing,$item,['id'=>$id ?? 0])]);
     }
     $table = $parts[0];
     if (!in_array($table, MusicContent::TABLES, true) || count($parts) > 2) errorResponse('Not found', 404);

@@ -17,3 +17,5 @@ config/cms_config.php
 .env*
 *.pem
 *.key
+
+/vendor/

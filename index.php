@@ -90,6 +90,14 @@ try {
         }
     }
 
+    if (!function_exists('musicLegacyTextVisible')) {
+        function musicLegacyTextVisible(array $row): bool {
+            if (($row['content_blocks'] ?? null) === null) return true;
+            $blocks=json_decode($row['content_blocks'],true,32,JSON_THROW_ON_ERROR);
+            return (bool)array_filter($blocks,static fn($block)=>$block['type']==='legacy' && $block['enabled']===true);
+        }
+    }
+
     // 4. Default metadata
     $pageTitle = 'FREIBERGER · music · stories · places · memories';
     $pageDesc = 'MUSIC FROM PLACES THAT REMEMBER · Der offizielle Soundtrack und das ungekürzte Hörbuch zu den Schauplätzen in Griechenland von Werner Freiberger.';
@@ -99,6 +107,16 @@ try {
     // 5. Route dispatch
     $db = freiberger_get_db();
 
+    $cmsPage = null;
+    if ($db && preg_match('#^/([a-z0-9-]+)$#D', $route, $urlMatch)) {
+        $url=$db->prepare('SELECT area,item_id FROM content_urls WHERE path=?');$url->execute([$urlMatch[1]]);$owner=$url->fetch();
+        if($owner && in_array($owner['area'],['books','pages'],true)) {
+            $lookup=$db->prepare('SELECT slug,is_published FROM '.$owner['area'].' WHERE id=?');$lookup->execute([$owner['item_id']]);$target=$lookup->fetch();
+            if(!$target || !(int)$target['is_published']) http_response_code(404);
+            if($target && (int)$target['is_published'] && $target['slug']!==$urlMatch[1]) {header('Location: '.($scriptDir ?: '').'/'.$target['slug'],true,301);return;}
+        }
+        $stmt=$db->prepare('SELECT * FROM pages WHERE slug=?');$stmt->execute([$urlMatch[1]]);$cmsPage=$stmt->fetch();
+    }
     $cmsBook = null;
     if ($db && preg_match('#^/([a-z0-9-]+)$#D', $route, $bookMatch)) {
         $bookSlug = $bookMatch[1] === 'die-orte-die-mich-sahen' ? 'die-orte-die-uns-sahen' : $bookMatch[1];
@@ -106,7 +124,13 @@ try {
         $stmt->execute([$bookSlug]);
         $cmsBook = $stmt->fetch();
     }
-    if ($cmsBook) {
+    if ($cmsPage) {
+        if(!musicLegacyTextVisible($cmsPage)) $cmsPage['description']=null;
+        $escape=static fn($value)=>htmlspecialchars((string)($value ?? ''),ENT_QUOTES,'UTF-8');
+        if (!(int)$cmsPage['is_published']) {http_response_code(404);$pageTitle='Seite nicht verfügbar | FREIBERGER';$pageDesc='Diese Seite ist nicht veröffentlicht.';}
+        else {$pageTitle=$cmsPage['title'].' | FREIBERGER';$pageDesc=$cmsPage['description'] ?: $cmsPage['title'];$noscriptHtml='<article><h1>'.$escape($cmsPage['title']).'</h1><p>'.$escape($cmsPage['description']).'</p></article>';}
+    } elseif ($cmsBook) {
+        if(!musicLegacyTextVisible($cmsBook)) {$cmsBook['description']=null;$cmsBook['subtitle']=null;}
         if (!(int)$cmsBook['is_published']) {
             http_response_code(404);
             $pageTitle = 'Buch nicht verfügbar | FREIBERGER';

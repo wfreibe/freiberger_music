@@ -24,6 +24,7 @@ jobs:
           php-version: '8.3'
           extensions: pdo_sqlite, gd, mbstring, zip
           coverage: none
+      - run: composer install --no-dev --no-scripts --no-plugins --prefer-dist --no-interaction
       - run: npm --prefix frontend ci
       - run: npm test
       - name: PHP syntax checks

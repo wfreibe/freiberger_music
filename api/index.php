@@ -35,6 +35,13 @@ $identifier = $segments[1] ?? null;
 
 // Route dispatching
 switch ($resource) {
+    case 'pages':
+        if ($identifier) {
+            $stmt=$pdo->prepare('SELECT * FROM pages WHERE slug=? AND is_published=1'); $stmt->execute([$identifier]);
+            $page=$stmt->fetch(); if(!$page) errorResponse('Seite nicht gefunden',404); jsonResponse($page);
+        }
+        jsonResponse($pdo->query('SELECT * FROM pages WHERE is_published=1 ORDER BY sort_order,id')->fetchAll());
+        break;
     case 'ready':
         $pdo->query('SELECT id FROM releases LIMIT 1');
         $pdo->query('SELECT credential_version FROM admin_credentials LIMIT 1');
@@ -69,7 +76,7 @@ switch ($resource) {
             $stmt = $pdo->prepare("
                 SELECT r.*,
                        p.name AS place_name, p.slug AS place_slug, p.tagline AS place_tagline, p.accent_color AS place_accent,
-                       c.title AS chapter_title, c.chapter_number, c.subtitle AS chapter_subtitle,
+                       c.title AS chapter_title, c.chapter_number, c.content_blocks AS chapter_content_blocks, c.subtitle AS chapter_subtitle,
                        s.title AS series_title, s.slug AS series_slug
                 FROM releases r
                 LEFT JOIN places p ON r.place_id = p.id
@@ -94,7 +101,7 @@ switch ($resource) {
             $sql = "
                 SELECT r.*,
                        p.name AS place_name, p.slug AS place_slug, p.accent_color AS place_accent,
-                       c.title AS chapter_title, c.chapter_number,
+                       c.title AS chapter_title, c.chapter_number, c.content_blocks AS chapter_content_blocks,
                        s.title AS series_title, s.slug AS series_slug
                 FROM releases r
                 LEFT JOIN places p ON r.place_id = p.id

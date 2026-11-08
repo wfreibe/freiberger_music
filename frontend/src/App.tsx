@@ -1,3 +1,6 @@
+import {SeriesPage} from './pages/SeriesPage';
+import {pages,loadPages} from './data/pages';
+import {ContentPage} from './pages/ContentPage';
 import { PlaylistBookPage } from './pages/PlaylistBookPage';
 import { AmbientStage } from './components/AmbientStage';
 import { HeaderNav } from './components/HeaderNav';
@@ -17,30 +20,35 @@ import { setLanguage } from './i18n';
 
 export function App() {
   const path = getCleanPath();
+  const page = pages.value.find(page=>`/${page.slug}`===path);
   const book = findBook(books.value ?? [], path);
   useEffect(() => {
-    void loadBooks();
-    const refresh = () => { void loadBooks(); };
+    void loadBooks(); void loadPages();
+    const refresh = () => { void loadBooks(); void loadPages(); };
     window.addEventListener('focus', refresh);
     return () => window.removeEventListener('focus', refresh);
   }, []);
-  useEffect(() => { if (book) setLanguage(book.language); }, [path, book?.id, book?.language]);
+  useEffect(() => { if (book || page) setLanguage((book || page)!.language); }, [path, book?.id, book?.language, page?.id, page?.language]);
 
   // Simple, robust client-side route dispatch
   let pageComponent = <HomePage />;
 
-  if (path === '/places' || path.startsWith('/places/')) {
+  if (path.startsWith('/series/')) {
+    pageComponent=<SeriesPage slug={path.slice(8)}/>;
+  } else if (path === '/places' || path.startsWith('/places/')) {
     pageComponent = <PlacesPage />;
   } else if (path === '/gard-7' || path === '/gard7') {
     pageComponent = <Gard7Page />;
   } else if (path === '/impressum' || path === '/datenschutz' || path === '/legal') {
     pageComponent = <LegalPage />;
+  } else if (page) {
+    pageComponent = <ContentPage key={page.id} page={page}/>;
   } else if (book) {
     pageComponent = book.songs_playlist_url && book.soundtrack_series_id == null ? <PlaylistBookPage key={book.id} book={book} /> : book.language === 'de' ? <BookPage key={book.id} book={book} />
       : <BookEditionPage key={book.id} edition={book.language} book={book} />;
   } else if (path !== '/') {
     pageComponent = <div class="hero-stage" role="status">
-      <h1 class="hero-headline">{booksError.value ? 'Buch nicht erreichbar' : books.value === null ? 'Buch wird geladen …' : 'Buch nicht verfügbar'}</h1>
+      <h1 class="hero-headline">{booksError.value ? 'Seite nicht erreichbar' : books.value === null ? 'Seite wird geladen …' : 'Seite nicht verfügbar'}</h1>
       {booksError.value && <button class="btn-editorial btn-editorial-ghost" onClick={() => void loadBooks()}>Erneut laden</button>}
     </div>;
   }

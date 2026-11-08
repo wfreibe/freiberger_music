@@ -1,3 +1,4 @@
+import { ContentBlocks } from '../components/ContentBlocks';
 import { useEffect, useState } from 'preact/hooks';
 import { Place, Release } from '../types';
 import { fetchPlaces, fetchPlaceBySlug, fetchReleases } from '../api/client';
@@ -57,7 +58,7 @@ export function PlacesPage() {
   // Single Place View
   if (slug && currentPlace) {
     return (
-      <div class="hero-stage" style={{ paddingBottom: '80px' }}>
+      <div class="hero-stage" style={{ paddingBottom: '80px' }}><ContentBlocks value={currentPlace.content_blocks}>
         <div style={{ marginBottom: '24px' }}>
           <a
             href="#/places"
@@ -146,7 +147,7 @@ export function PlacesPage() {
             </div>
           </div>
         )}
-      </div>
+      </ContentBlocks></div>
     );
   }
 

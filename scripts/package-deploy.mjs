@@ -12,6 +12,7 @@ const destination = fs.createWriteStream(path.join(output, 'freiberger-music-dep
 const finished = new Promise((resolve, reject) => { destination.on('close', resolve); destination.on('error', reject); zip.on('error', reject); });
 zip.pipe(destination);
 function add(source, target) {
+  if (/^vendor\/composer\/tmp-/.test(source) || /[~]$/.test(source)) return;
   const full = path.join(root, source);
   const stat = fs.lstatSync(full);
   if (stat.isSymbolicLink()) throw new Error('Symlinks are not allowed in packages');
@@ -30,7 +31,7 @@ add('index.php', 'webroot/index.php');
 // Explicit API allowlist: never expose migrations, SQL seeds or obsolete Studio.
 for (const name of ['index.php','bootstrap.php','runtime.php','cms.php','youtube.php']) add(`api/${name}`, `webroot/api/${name}`);
 add('.htaccess.domainfactory', 'webroot/.htaccess');
-for (const folder of ['lib','bin','migrations','docs']) add(folder, `server/${folder}`);
+for (const folder of ['lib','bin','migrations','docs','vendor']) add(folder, `server/${folder}`);
 add('config/cms_config.sample.php', 'server/config/cms_config.sample.php');
 await zip.finalize(); await finished;
 const archive = path.join(output, 'freiberger-music-deploy.zip');

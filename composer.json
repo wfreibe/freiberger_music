@@ -1,0 +1,13 @@
+{
+  "name": "freiberger/music",
+  "type": "project",
+  "require": {
+    "php": ">=8.2",
+    "ezyang/htmlpurifier": "4.19.1"
+  },
+  "config": {
+    "allow-plugins": {},
+    "sort-packages": true
+  },
+  "license": "proprietary"
+}

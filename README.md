@@ -144,3 +144,7 @@ Verifizierte Playlist-Metadaten: `scripts/audiobook-playlists.json`; lokaler Imp
 Für die ausdrücklich gewünschte vollständige Neuinstallation den Inhalt von `deploy-domainfactory-full/` oder `deploy-domainfactory-full.zip` verwenden, inklusive `storage/freiberger.sqlite`. `dist/` enthält nur den aktuellen Frontend-Build. Datenbank und früheres Full-Paket sind unter `.deployment-backups/` gesichert. Noch kein Upload durchgeführt.
 
 Prüfungen: 14 Node-Tests, PHP-Studio-Regressionstest, TypeScript/Vite-Build, frische Installation des SQL-Seeds, DB-Integrität, Fremdschlüssel sowie alle 24 Kapitel-IDs und Laufzeiten im vollständigen Installationspaket. Browser-Vorschau in dieser Sitzung wegen lokaler Verbindungsblockade nicht überprüfbar.
+
+## CMS-Weiterentwicklung
+
+Die Übernahme der neuen Editor-, Vorschau-, Inhaltsbaustein- und Seitenfunktionen aus freiberger.design ist in [docs/CMS_UPDATE_2026_11.md](docs/CMS_UPDATE_2026_11.md) beschrieben. Vor lokalen CMS-Tests einmal `composer install --no-dev --no-scripts --no-plugins` und `npm --prefix frontend ci` ausführen.

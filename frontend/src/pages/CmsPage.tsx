@@ -1,20 +1,20 @@
+import { ContentBlocksEditor } from '../components/ContentBlocksEditor';
+import { pageBlocks } from '../utils/contentBlocks';
 import { CmsPreviewFrame } from '../components/CmsPreviewFrame';
 import { useEffect, useState } from 'preact/hooks';
 import { getApiBase } from '../api/client';
 import '../styles/cms-workspace.css';
 import '../styles/music-cms.css';
-
 type Item = Record<string, string | number | null>;
 type RecordVersion = { item: Item; revision: string };
 type Field = { name: string; type: string; notnull: number; dflt_value: string | null };
 type Collection = { items: RecordVersion[]; fields: Field[]; choices: Record<string, { id: number; label: string }[]> };
-const areas: Record<string, string> = { releases: 'Musik & Hörbücher', books: 'Bücher', chapters: 'Buchkapitel', places: 'Orte', series: 'Alben & Serien' };
+const areas: Record<string, string> = { releases: 'Musik & Hörbücher', books: 'Bücher', chapters: 'Buchkapitel', places: 'Orte', series: 'Alben & Serien', pages: 'Eigene Seiten' };
 const links: Record<string, string> = { place_id: 'places', book_id: 'books', chapter_id: 'chapters', release_id: 'releases', series_id: 'series' };
 const labels: Record<string, string> = { slug: 'URL-Name', title: 'Titel', name: 'Name', subtitle: 'Untertitel', type: 'Inhaltstyp', release_date: 'Veröffentlichung', cover: 'Cover', youtube_id: 'YouTube-Video oder Video-Link', youtube_playlist_id: 'YouTube-Playlist-ID', genre: 'Genre', bpm: 'Tempo (BPM)', duration: 'Dauer', description: 'Beschreibung', story: 'Geschichte', lyrics: 'Songtext', featured: 'Hervorgehoben', sort_order: 'Reihenfolge', place_id: 'Ort', book_id: 'Buch', chapter_id: 'Kapitel', release_id: 'Veröffentlichung', series_id: 'Album / Serie', greek_name: 'Griechischer Name', tagline: 'Leitsatz', coordinates: 'Koordinaten', image: 'Bild', accent_color: 'Akzentfarbe', chapter_number: 'Kapitelnummer', excerpt: 'Auszug', author: 'Autor' };
 const longText = new Set(['description', 'story', 'lyrics', 'excerpt']);
-Object.assign(links, { soundtrack_series_id: 'series', audiobook_series_id: 'series' });
-Object.assign(labels, { film_youtube_id: 'Film – YouTube-Video oder Video-Link', film_title: 'Filmtitel', film_duration: 'Filmlaufzeit (Minuten:Sekunden)', release_year: 'Erscheinungsjahr', formats: 'Formate (durch · trennen)', purchase_url: 'Buch kaufen (HTTPS-Link)', songs_playlist_url: 'Songs – YouTube-Playlist', audiobook_playlist_url: 'Hörbuch – YouTube-Playlist', film_url: 'Film – HTTPS-Link', language: 'Sprache der Buchausgabe', menu_label: 'Menübezeichnung (leer = Buchtitel)', show_in_navigation: 'Im Bücher-Menü anzeigen', is_published: 'Veröffentlicht / öffentlich erreichbar', soundtrack_source: 'Soundtrack-Quelle', soundtrack_series_id: 'Serie für den Soundtrack', audiobook_series_id: 'Serie für das Hörbuch' });
-
+Object.assign(links, { parent_id: 'pages', soundtrack_series_id: 'series', audiobook_series_id: 'series' });
+Object.assign(labels, { parent_id: 'Übergeordneter Menüpunkt', content_blocks: 'Inhaltselemente', film_youtube_id: 'Film – YouTube-Video oder Video-Link', film_title: 'Filmtitel', film_duration: 'Filmlaufzeit (Minuten:Sekunden)', release_year: 'Erscheinungsjahr', formats: 'Formate (durch · trennen)', purchase_url: 'Buch kaufen (HTTPS-Link)', songs_playlist_url: 'Songs – YouTube-Playlist', audiobook_playlist_url: 'Hörbuch – YouTube-Playlist', film_url: 'Film – HTTPS-Link', language: 'Sprache der Buchausgabe', menu_label: 'Menübezeichnung (leer = Buchtitel)', show_in_navigation: 'Im Bücher-Menü anzeigen', is_published: 'Veröffentlicht / öffentlich erreichbar', soundtrack_source: 'Soundtrack-Quelle', soundtrack_series_id: 'Serie für den Soundtrack', audiobook_series_id: 'Serie für das Hörbuch' });
 export function CmsPage() {
   const [csrf, setCsrf] = useState('');
   const [authenticated, setAuthenticated] = useState(false);
@@ -27,11 +27,11 @@ export function CmsPage() {
   const [selected, setSelected] = useState<RecordVersion | null>(null);
   const [draft, setDraft] = useState<Item | null>(null);
   const [filter, setFilter] = useState('');
+  const [livePreview, setLivePreview] = useState(true);
   const [showList, setShowList] = useState(true);
   const [previewWidth, setPreviewWidth] = useState<'desktop' | 'mobile'>('desktop');
   const [previewReload, setPreviewReload] = useState(0);
   const dirty = draft !== null && JSON.stringify(draft) !== JSON.stringify(selected?.item ?? null);
-
   async function request(route: string, method = 'GET', body?: unknown) {
     const res = await fetch(`${getApiBase()}/cms/${route}`, {
       method, credentials: 'same-origin', signal: AbortSignal.timeout(15000),
@@ -46,13 +46,11 @@ export function CmsPage() {
     }
     return data;
   }
-
   async function load(target: string) {
     setCollection(null);
     const data = await request(target);
     setCollection(data);
   }
-
   useEffect(() => {
     request('session').then(data => { setAuthenticated(data.authenticated); setChangePassword(data.passwordChangeRequired); })
       .catch(() => setMessage('CMS nicht erreichbar. Konfiguration und Datenmigration prüfen.')).finally(() => setReady(true));
@@ -65,14 +63,12 @@ export function CmsPage() {
     window.addEventListener('beforeunload', warn);
     return () => window.removeEventListener('beforeunload', warn);
   }, [dirty]);
-
   function mayLeave() { return !dirty || window.confirm('Ungespeicherte Änderungen verwerfen?'); }
   async function perform(action: () => Promise<void>) {
     setBusy(true); setMessage('');
     try { await action(); } catch (error) { setMessage(error instanceof Error ? error.message : 'Vorgang fehlgeschlagen.'); }
     finally { setBusy(false); }
   }
-
   if (!ready) return <div class="music-cms cms-login-page">CMS wird geladen …</div>;
   if (!authenticated || changePassword) return <div class="music-cms cms-login-page"><form class="music-cms-login" onSubmit={event => {
     event.preventDefault(); const form = new FormData(event.currentTarget);
@@ -86,7 +82,6 @@ export function CmsPage() {
     {changePassword && <label>Passwort bestätigen<input name="confirmation" type="password" autoComplete="new-password" required /></label>}
     <p role="status">{message}</p><button disabled={busy || !csrf}>{changePassword ? 'Passwort speichern' : 'Anmelden'}</button><a href="/">Zur Website</a>
   </form></div>;
-
   return <div class="music-cms cms-workspace"><aside class="cms-workspace-sidebar"><div class="cms-workspace-brand"><strong>FREIBERGER.MUSIC</strong><small>REDAKTIONSBEREICH</small></div><div class="cms-workspace-nav-group"><p class="cms-workspace-nav-label">INHALTE VERWALTEN</p><nav aria-label="Inhaltsbereiche">
     {Object.entries(areas).map(([key, label]) => <button class={`cms-workspace-nav-item ${key === area ? 'is-selected' : ''}`} disabled={busy} aria-current={key === area ? 'page' : undefined} onClick={() => {
       if (key !== area && mayLeave()) { setArea(key); setShowList(true); setDraft(null); setSelected(null); setMessage(''); setFilter(''); }
@@ -99,7 +94,7 @@ export function CmsPage() {
     setSelected(null); setDraft(item); setMessage('');
   }} class="cms-workspace-button cms-workspace-button-primary">＋ Neuer Inhalt</button></header><div class="cms-workspace-statusline"><span><i aria-hidden="true" /> Redaktionsbereich aktiv</span><span>{dirty ? 'Ungespeicherte Änderungen' : 'Gespeicherte Inhalte'}</span></div><p role="status" aria-live="polite" class="music-cms-message">{message}</p>
   {!collection ? <p>Inhalte werden geladen …</p> : <div class="music-cms-columns"><section class="cms-workspace-card music-cms-collection" aria-label="Inhaltsliste"><details open={showList} onToggle={event => setShowList(event.currentTarget.open)}><summary class="cms-workspace-card-head"><span><strong>Inhalt auswählen</strong>{selected && <small> · {selected.item.title || selected.item.name}</small>}</span><span>{collection.items.length} Einträge ⌄</span></summary><div class="cms-workspace-card-body"><input aria-label="Inhalte filtern" placeholder="Suchen …" value={filter} onInput={event => setFilter(event.currentTarget.value)} /><ul class="music-cms-list">
-    {collection.items.filter(row => String(row.item.title || row.item.name).toLowerCase().includes(filter.toLowerCase())).map(row => <li><button disabled={busy} aria-pressed={row.item.id === selected?.item.id} onClick={() => { if (mayLeave()) { setSelected(row); setShowList(false); setDraft({ ...row.item }); setMessage(''); } }}><strong>{row.item.title || row.item.name}</strong><small>{row.item.language ? String(row.item.language).toUpperCase() + ' · ' : ''}{row.item.type || row.item.slug || `Nr. ${row.item.chapter_number}`}</small>{area === 'books' && <span class={`cms-workspace-pill ${Number(row.item.is_published) ? 'is-on' : ''}`}>{Number(row.item.is_published) ? 'Veröffentlicht' : 'Entwurf'}</span>}</button></li>)}
+    {collection.items.filter(row => String(row.item.title || row.item.name).toLowerCase().includes(filter.toLowerCase())).map(row => <li><button disabled={busy} aria-pressed={row.item.id === selected?.item.id} onClick={() => { if (mayLeave()) { setSelected(row); setShowList(false); setDraft({ ...row.item }); setMessage(''); } }}><strong>{row.item.title || row.item.name}</strong><small>{row.item.language ? String(row.item.language).toUpperCase() + ' · ' : ''}{row.item.type || row.item.slug || `Nr. ${row.item.chapter_number}`}</small>{['books','pages'].includes(area) && <span class={`cms-workspace-pill ${Number(row.item.is_published) ? 'is-on' : ''}`}>{Number(row.item.is_published) ? 'Veröffentlicht' : 'Entwurf'}</span>}</button></li>)}
   </ul></div></details></section><section class="cms-workspace-card music-cms-editor" aria-label="Inhalt bearbeiten"><div class="cms-workspace-card-body">{!draft ? <p>Inhalt auswählen oder neu anlegen.</p> : <form onSubmit={event => {
     event.preventDefault(); perform(async () => {
       const item = Object.fromEntries(collection.fields.map(f => [f.name, draft[f.name] ?? null]));
@@ -107,13 +102,14 @@ export function CmsPage() {
       setSelected(result); setDraft({ ...result.item }); await load(area); setMessage('Gespeichert.');
     });
   }}><h2>{selected ? 'Inhalt bearbeiten' : 'Neuer Inhalt'}</h2>
-    {area === 'books' && <p>„Veröffentlicht“ steuert die öffentliche Buchseite. „Im Bücher-Menü anzeigen“ steuert die Links in Kopf- und Fußbereich. Kleinere Reihenfolgen erscheinen zuerst. Ohne eigene Menübezeichnung wird der Buchtitel verwendet.</p>}
-    <fieldset disabled={busy}>
-    {collection.fields.map(field => {
+    {['books','pages'].includes(area) && <p>„Veröffentlicht“ steuert die öffentliche Seite. „{area === 'books' ? 'Im Bücher-Menü anzeigen' : 'Im Hauptmenü anzeigen'}“ steuert die sichtbaren Navigationslinks. Kleinere Reihenfolgen erscheinen zuerst. Ohne eigene Menübezeichnung wird der Titel verwendet. Bei neuen Seiten kann der URL-Name leer bleiben; er wird beim Speichern aus Menüname oder Titel gebildet.</p>}
+    <fieldset disabled={busy} onInvalidCapture={event => { const el=event.target as HTMLElement; el.closest('details')?.setAttribute('open',''); }}>
+    {fieldGroups(collection.fields).map(group => <details key={group.label} class="music-cms-field-group" open={group.label === 'Grunddaten'}><summary>{group.label}</summary>{group.fields.map(field => {
       const name = field.name; const value = draft[name] ?? ''; const update = (v: string) => setDraft({ ...draft, [name]: v });
-      const options = links[name] ? collection.choices[links[name]].map(row => [String(row.id), row.label]) : name === 'language' ? [['de','DE – Deutsch'],['en','EN – Englisch'],['fr','FR – Französisch']] : name === 'soundtrack_source' ? [['series','Aus gewählter Serie'],['english_book','Englischer Bestandssoundtrack (10 Titel)']] : name === 'type' ? [['song','Song (Buch-Soundtrack)'],['audiobook','Hörbuch'],['gard7','GARD 7'],['single','Single'],['ep','EP'],['album','Album'],['chapter_audio','Audio-Kapitel']] : ['featured','is_published','show_in_navigation'].includes(name) ? [['0','Nein'],['1','Ja']] : null;
-      return <label>{labels[name] || name}{options ? <select value={String(value)} required={!!field.notnull} onChange={event => update(event.currentTarget.value)}>{!field.notnull && <option value="">Keine Zuordnung</option>}{options.map(([id, label]) => <option value={id}>{label}</option>)}</select> : longText.has(name) ? <textarea rows={6} value={value} onInput={event => update(event.currentTarget.value)} /> : <input value={value} required={!!field.notnull} type={field.type.includes('INT') ? 'number' : name === 'release_date' ? 'date' : 'text'} min={field.type.includes('INT') ? 0 : undefined} onInput={event => update(event.currentTarget.value)} />}</label>;
-    })}
+      const options = links[name] ? collection.choices[links[name]].filter(row => name !== 'parent_id' || row.id !== selected?.item.id).map(row => [String(row.id), row.label]) : name === 'language' ? [['de','DE – Deutsch'],['en','EN – Englisch'],['fr','FR – Französisch']] : name === 'soundtrack_source' ? [['series','Aus gewählter Serie'],['english_book','Englischer Bestandssoundtrack (10 Titel)']] : name === 'type' ? [['song','Song (Buch-Soundtrack)'],['audiobook','Hörbuch'],['gard7','GARD 7'],['single','Single'],['ep','EP'],['album','Album'],['chapter_audio','Audio-Kapitel']] : ['featured','is_published','show_in_navigation'].includes(name) ? [['0','Nein'],['1','Ja']] : null;
+      return <label>{area === 'pages' && name === 'language' ? 'Seitensprache' : area === 'pages' && name === 'show_in_navigation' ? 'Im Hauptmenü anzeigen' : labels[name] || name}{options ? <select value={String(value)} required={!!field.notnull} onChange={event => update(event.currentTarget.value)}>{!field.notnull && <option value="">Keine Zuordnung</option>}{options.map(([id, label]) => <option value={id}>{label}</option>)}</select> : longText.has(name) ? <textarea rows={6} value={value} onInput={event => update(event.currentTarget.value)} /> : <input value={value} required={!!field.notnull && !(name === 'slug' && !selected && ['books','pages'].includes(area))} type={field.type.includes('INT') ? 'number' : name === 'release_date' ? 'date' : 'text'} min={field.type.includes('INT') ? 0 : undefined} onInput={event => update(event.currentTarget.value)} />}</label>;
+    })}</details>)}
+    <ContentBlocksEditor blocks={pageBlocks(draft.content_blocks)} onChange={(blocks: unknown) => setDraft({...draft,content_blocks:JSON.stringify(blocks)})} csrfToken={csrf} onBusyChange={(value: boolean) => setBusy(value)} busy={busy}/>
     {collection.fields.some(f => ['cover', 'image'].includes(f.name)) && <label>Bild hochladen (JPEG, PNG, WebP; max. 8 MiB)<input type="file" accept="image/jpeg,image/png,image/webp" onChange={event => {
       const file = event.currentTarget.files?.[0]; if (!file) return;
       perform(async () => {
@@ -133,7 +129,15 @@ export function CmsPage() {
       <button type="button" class={previewWidth === 'desktop' ? 'is-active' : ''} aria-label="Desktop-Vorschau" aria-pressed={previewWidth === 'desktop'} onClick={() => setPreviewWidth('desktop')}>▱</button>
       <button type="button" class={previewWidth === 'mobile' ? 'is-active' : ''} aria-label="Mobil-Vorschau" aria-pressed={previewWidth === 'mobile'} onClick={() => setPreviewWidth('mobile')}>▯</button>
     </div></header>
-    <p class="cms-workspace-preview-note">Gespeicherter Inhalt · Website-Gestaltung{dirty ? ' · Änderungen zuerst speichern' : ''}</p>
-    {selected ? <CmsPreviewFrame area={area} id={selected.item.id!} revision={selected.revision} mobile={previewWidth === 'mobile'} reload={previewReload} title={String(selected.item.title || selected.item.name)} /> : <div class="cms-workspace-preview-area"><p class="music-cms-empty">Wähle einen gespeicherten Inhalt für die Vorschau aus.</p></div>}<footer class="cms-workspace-preview-foot"><span>{selected ? (area === 'books' ? (Number(selected.item.is_published) ? 'Veröffentlicht' : 'Entwurf') : 'Gespeicherter Inhalt') : 'Noch kein Inhalt ausgewählt'}</span><button type="button" disabled={!selected} onClick={() => setPreviewReload(value => value + 1)}>Aktualisieren ↻</button></footer>
+    <p class="cms-workspace-preview-note">{livePreview ? 'Ungespeicherte Inhaltsvorschau · wird nicht veröffentlicht' : 'Gespeicherter Stand · Website-Gestaltung'}</p>
+    <div class="music-cms-preview-mode" role="group" aria-label="Vorschaustand"><button type="button" aria-pressed={livePreview} onClick={() => setLivePreview(true)}>Aktueller Entwurf</button><button type="button" disabled={!selected} aria-pressed={!livePreview} onClick={() => setLivePreview(false)}>Gespeicherter Stand</button></div>
+    {draft && (selected || livePreview) ? <CmsPreviewFrame area={area} id={selected?.item.id ?? 0} revision={selected?.revision ?? 'new'} live={livePreview} csrf={csrf} draft={Object.fromEntries(collection!.fields.map(f => [f.name,draft[f.name] ?? null]))} mobile={previewWidth === 'mobile'} reload={previewReload} title={String(draft.title || draft.name || 'Neuer Inhalt')} /> : <div class="cms-workspace-preview-area"><p class="music-cms-empty">Wähle einen gespeicherten Inhalt für die Vorschau aus.</p></div>}<footer class="cms-workspace-preview-foot"><span>{selected ? (['books','pages'].includes(area) ? (Number(selected.item.is_published) ? 'Veröffentlicht' : 'Entwurf') : 'Gespeicherter Inhalt') : 'Noch kein Inhalt ausgewählt'}</span><button type="button" disabled={!selected} onClick={() => setPreviewReload(value => value + 1)}>Aktualisieren ↻</button></footer>
   </aside></div>}<footer class="cms-workspace-footer"><span>FREIBERGER.MUSIC · CMS</span><span>Inhalte pflegen. Geschichten erzählen.</span></footer></main></div></div>;
+}
+function fieldGroups(fields: Field[]) {
+ const groups = ['Grunddaten','Veröffentlichung & Menü','Texte','Bilder & Medien','Verknüpfungen'];
+ const classify = (name: string) => ['language','title','name','slug','subtitle','author','release_year','release_date','formats','chapter_number','duration','genre','bpm'].includes(name) ? 0
+ : ['show_in_navigation','is_published','sort_order','menu_label','featured','parent_id'].includes(name) ? 1
+ : longText.has(name) ? 2 : links[name] ? 4 : 3;
+ return groups.map((label,index)=>({label,fields:fields.filter(field=>field.name!=='content_blocks'&&classify(field.name)===index)})).filter(group=>group.fields.length);
 }

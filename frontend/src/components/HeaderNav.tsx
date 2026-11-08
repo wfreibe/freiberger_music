@@ -1,3 +1,4 @@
+import {PageNavigation} from './PageNavigation';
 import { useState } from 'preact/hooks';
 import { BookNavigation } from './BookNavigation';
 import { LanguageSwitcher } from './LanguageSwitcher';
@@ -47,6 +48,7 @@ export function HeaderNav() {
           {t('nav_gard7')}
         </a>
 
+        <PageNavigation/>
         {/* Language Switcher */}
         <LanguageSwitcher />
 
@@ -86,7 +88,7 @@ export function HeaderNav() {
         >
           🗺️ {t('nav_places')}
         </a>
-        <BookNavigation mobile onNavigate={() => setMobileOpen(false)} />
+        <BookNavigation mobile onNavigate={() => setMobileOpen(false)} /><PageNavigation mobile onNavigate={() => setMobileOpen(false)}/>
         <a
           href="#/gard-7"
           onClick={(e) => handleNav(e, '/gard-7')}

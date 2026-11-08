@@ -1,3 +1,4 @@
+import { ContentBlocks } from './ContentBlocks';
 import { activeTrack, isDrawerOpen, closeDrawer, togglePlay, isPlaying } from '../player/playerStore';
 import { YouTubeFacade } from './YouTubeFacade';
 import { navigate } from '../router';
@@ -129,7 +130,7 @@ export function PlayerDrawer() {
           </div>
 
           {/* Right Column: Editorial Texts, Background Story, Lyrics */}
-          <div>
+          <div><ContentBlocks value={track.content_blocks}>
             <div style={{ fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--accent-sand)', marginBottom: '8px' }}>
               FREIBERGER · {track.series_title || 'THE GREECE CHAPTERS'}
             </div>
@@ -204,7 +205,7 @@ export function PlayerDrawer() {
                 </a>
               )}
             </div>
-          </div>
+          </ContentBlocks><ContentBlocks value={track.chapter_content_blocks}/></div>
         </div>
       </div>
     </div>

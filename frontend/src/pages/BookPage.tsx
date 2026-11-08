@@ -1,3 +1,4 @@
+import { ContentBlocks } from '../components/ContentBlocks';
 import { BookFilm } from '../components/BookFilm';
 import { BookLinks } from '../components/BookLinks';
 import { useEffect, useState } from 'preact/hooks';
@@ -50,7 +51,7 @@ export function BookPage({ book }: { book: Book }) {
   }
 
   return (
-    <div class="hero-stage" style={{ paddingBottom: '90px' }}>
+    <div class="hero-stage" style={{ paddingBottom: '90px' }}><ContentBlocks value={book.content_blocks}>
       <div class="hero-super">
         {t('book_page_super')}
       </div>
@@ -456,6 +457,6 @@ export function BookPage({ book }: { book: Book }) {
           )}
         </div>
       )}
-    </div>
+    </ContentBlocks></div>
   );
 }

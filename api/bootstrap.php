@@ -43,6 +43,7 @@ if (!function_exists('str_contains')) {
 function jsonResponse($data, int $statusCode = 200): void {
     http_response_code($statusCode);
     header('Content-Type: application/json; charset=utf-8');
+    if (!preg_match('#/api/cms(?:/|$)#', parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH))) $data = publicMusicContent($data);
     echo json_encode(normalizeYouTubeResponse($data), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
     exit;
 }
@@ -56,3 +57,17 @@ function errorResponse(string $message, int $statusCode = 400): void {
 }
 
 function getDbConnection(): PDO { return Database::getConnection(); }
+
+function publicMusicContent($data) {
+    if (!is_array($data)) return $data;
+    if (array_key_exists('chapter_content_blocks', $data)) { global $server; require_once $server . '/lib/ContentBlocks.php'; $data['chapter_content_blocks']=ContentBlocks::response($data['chapter_content_blocks'],false); }
+    if (array_key_exists('content_blocks', $data)) {
+        global $server; require_once $server . '/lib/ContentBlocks.php';
+        $data['content_blocks'] = ContentBlocks::response($data['content_blocks'], false);
+        if (!array_filter($data['content_blocks'], static fn($b) => $b['type'] === 'legacy')) {
+            foreach (['description','story','lyrics','excerpt','cover','image'] as $field) if (array_key_exists($field,$data)) $data[$field] = null;
+        }
+    }
+    foreach ($data as $key => $value) if ($key !== 'content_blocks' && is_array($value)) $data[$key] = publicMusicContent($value);
+    return $data;
+}

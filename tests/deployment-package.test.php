@@ -7,6 +7,7 @@ for ($i=0; $i<$zip->numFiles; $i++) {
     $name = $zip->getNameIndex($i);
     if (isset($seen[$name])) throw new RuntimeException('Duplicate archive entry: ' . $name);
     $seen[$name] = true;
+    if (str_contains($name, '/composer/tmp-') || str_ends_with($name, '~')) throw new RuntimeException('Temporary dependency file in archive.');
     if (preg_match('#(^|/)(storage|uploads|sessions|node_modules|\.git|cms_config\.php)(/|$)|\.(sqlite.*|db|key|pem|log|env)$#i', $name)) throw new RuntimeException('Runtime data in archive.');
     if (str_starts_with($name, 'webroot/') && preg_match('#\.(sql|md)$|/(lib|bin|config|studio)/#i', $name)) throw new RuntimeException('Private source in webroot.');
 }

@@ -27,7 +27,7 @@ function prepareMusicPrivate(string $package, string $digest, string $live, stri
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $name = $zip->getNameIndex($i);
             if (!is_string($name) || isset($seen[$name]) || str_contains($name, '\\') || str_contains($name, "\0") || preg_match('#(^|/)\.{1,2}(/|$)#', $name)) throw new RuntimeException('Unsafe package entry.');
-            if (!preg_match('#^(webroot/(index\.(html|php)|\.htaccess|assets/[^/]+\.(js|css)|covers/[a-zA-Z0-9_./-]+\.(svg|jpe?g|png|webp|gif|mp3|m4a|ogg|wav|mp4|webm)|api/(index|bootstrap|runtime|cms|youtube)\.php)|server/(lib/[A-Za-z0-9_-]+\.php|bin/[A-Za-z0-9_-]+\.php|migrations/[A-Za-z0-9_-]+\.sql|docs/[A-Za-z0-9_-]+\.md|config/cms_config\.sample\.php))$#D', $name)) throw new RuntimeException('Unexpected package path.');
+            if (!preg_match('#^(webroot/(index\.(html|php)|\.htaccess|assets/[^/]+\.(js|css)|covers/[a-zA-Z0-9_./-]+\.(svg|jpe?g|png|webp|gif|mp3|m4a|ogg|wav|mp4|webm)|api/(index|bootstrap|runtime|cms|youtube)\.php)|server/(vendor/[a-zA-Z0-9_./-]+|lib/[A-Za-z0-9_-]+\.php|bin/[A-Za-z0-9_-]+\.php|migrations/[A-Za-z0-9_-]+\.sql|docs/[A-Za-z0-9_-]+\.md|config/cms_config\.sample\.php))$#D', $name)) throw new RuntimeException('Unexpected package path.');
             if ($zip->getExternalAttributesIndex($i, $system, $attributes) && (($attributes >> 16) & 0170000) === 0120000) throw new RuntimeException('Linked package entry.');
             $expanded += $zip->statIndex($i)['size'];
             if ($expanded > 268435456) throw new RuntimeException('Package exceeds 256 MiB limit.');

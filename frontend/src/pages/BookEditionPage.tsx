@@ -1,3 +1,4 @@
+import { ContentBlocks } from '../components/ContentBlocks';
 import { BookFilm } from '../components/BookFilm';
 import { BookLinks } from '../components/BookLinks';
 import { useEffect, useState } from 'preact/hooks';
@@ -41,7 +42,7 @@ export function BookEditionPage({ edition, book }: { edition: 'en' | 'fr'; book:
   };
 
   return (
-    <div class="hero-stage" lang={language} style={{ paddingBottom: '90px' }}>
+    <div class="hero-stage" lang={language} style={{ paddingBottom: '90px' }}><ContentBlocks value={book.content_blocks}>
       <div class="hero-super">{copy.super}</div>
       <h1 class="hero-headline" lang={edition} style={{ fontSize: 'clamp(2.8rem, 7vw, 7.5rem)', maxWidth: '1100px' }}>
         {book.title.toLocaleUpperCase(book.language)}
@@ -125,6 +126,6 @@ export function BookEditionPage({ edition, book }: { edition: 'en' | 'fr'; book:
           <p>{copy.audiobookNote}</p>
         </section>
       )}
-    </div>
+    </ContentBlocks></div>
   );
 }
