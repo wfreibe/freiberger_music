@@ -20,6 +20,16 @@ test('CMS migration, secure authentication and music CRUD with isolated syntheti
   t.after(async () => { if (server) { server.kill(); await new Promise(resolve => server.once('exit', resolve)); } fs.rmSync(temp, { recursive: true, force: true }); });
   php(['tests/cms-fixture.php']);
   assert.match(php(['bin/migrate.php']), /integrity_check=ok/);
+  const riverBook = JSON.parse(php(['-r', '$d=new PDO("sqlite:".getenv("CMS_DB_PATH")); echo json_encode($d->query("SELECT * FROM books WHERE slug=\'der-fluss-kennt-keine-erben\'")->fetch(PDO::FETCH_ASSOC));']));
+  assert.equal(riverBook.title, 'Der Fluss kennt keine Erben');
+  assert.equal(riverBook.menu_label, 'DER FLUSS KENNT KEINE ERBEN');
+  assert.equal(Number(riverBook.show_in_navigation), 1);
+  assert.equal(Number(riverBook.is_published), 1);
+  const riverBlocks = JSON.parse(riverBook.content_blocks);
+  assert.equal(riverBlocks[1].data.href, 'https://www.youtube.com/playlist?list=PLMwXitdFTZtQ');
+  assert.equal(riverBlocks[2].data.href, 'https://www.epubli.com/?s=Werner+Freiberger');
+  php(['-r', '$d=new PDO("sqlite:".getenv("CMS_DB_PATH")); $d->exec("UPDATE books SET subtitle=\'Editorial change\' WHERE slug=\'der-fluss-kennt-keine-erben\'"); $d->exec(file_get_contents("migrations/108_der_fluss.sql")); echo $d->query("SELECT COUNT(*) FROM books WHERE slug=\'der-fluss-kennt-keine-erben\'")->fetchColumn() === 1 ? "" : exit(1);']);
+  assert.equal(php(['-r', '$d=new PDO("sqlite:".getenv("CMS_DB_PATH")); echo $d->query("SELECT subtitle FROM books WHERE slug=\'der-fluss-kennt-keine-erben\'")->fetchColumn();']), 'Editorial change');
   const backups = fs.readdirSync(env.CMS_BACKUP_DIR).length;
   php(['bin/migrate.php']);
   assert.equal(fs.readdirSync(env.CMS_BACKUP_DIR).length, backups, 'idempotent migration creates no redundant backup');
