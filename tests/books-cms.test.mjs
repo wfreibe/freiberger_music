@@ -61,6 +61,17 @@ test('book film uses a validated video and its own player identity', () => {
   assert.equal(bookFilm({...filmBook,film_youtube_id:'https://untrusted.example/video'}),null);
 });
 
+test('Der Fluss playlist songs use the shared book player in playlist order', () => {
+  const manifest = JSON.parse(fs.readFileSync(new URL('../scripts/fluss-playlist.json', import.meta.url), 'utf8'));
+  assert.equal(manifest.videos.length, 5);
+  assert.equal(new Set(manifest.videos.map(video => video.id)).size, 5);
+  const tracks = manifest.videos.map((video, index) => ({id:index+1,title:video.title,youtube_id:video.id,duration:video.duration,type:'song',series_id:7,sort_order:index+1}));
+  assert.ok(tracks.every(track => /^[A-Za-z0-9_-]{11}$/.test(track.youtube_id)));
+  const media = bookMedia(book(7, {soundtrack_series_id:7}), [...tracks,{id:99,type:'song',series_id:8}]);
+  assert.deepEqual(media.songs.map(track => track.youtube_id), manifest.videos.map(video => video.id));
+  assert.deepEqual(media.audiobooks, []);
+});
+
 test('content module helpers reject unsafe media and preserve sorting inputs', async () => {
   const result=await build({entryPoints:[fileURLToPath(new URL('../frontend/src/utils/contentBlocks.js',import.meta.url))],bundle:true,platform:'node',format:'esm',write:false});
   const utils=await import('data:text/javascript;base64,'+Buffer.from(result.outputFiles[0].text).toString('base64'));

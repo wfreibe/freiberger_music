@@ -59,7 +59,11 @@ test('CMS migration, secure authentication and music CRUD with isolated syntheti
     if (data.csrf_token) csrf = data.csrf_token;
     return { data, response };
   }
-  const publicRead = await request('releases'); assert.equal(publicRead.data.length, 13); assert.equal(publicRead.response.headers.get('set-cookie'), null);
+  const publicRead = await request('releases'); assert.equal(publicRead.data.length, 18); assert.equal(publicRead.response.headers.get('set-cookie'), null);
+  const riverManifest = JSON.parse(fs.readFileSync('scripts/fluss-playlist.json', 'utf8'));
+  const riverTracks = publicRead.data.filter(track => track.series_id === riverBook.soundtrack_series_id);
+  assert.deepEqual(riverTracks.map(track => ({id:track.youtube_id,title:track.title,duration:track.duration})), riverManifest.videos);
+  assert.ok(riverTracks.every(track => track.type === 'song' && track.youtube_playlist_id === riverManifest.playlist));
   await request('releases', 'POST', {}, 405);
   await request('cms/releases', 'GET', undefined, 401);
   await request('cms/preview/books/1', 'GET', undefined, 401);
@@ -70,7 +74,7 @@ test('CMS migration, secure authentication and music CRUD with isolated syntheti
   await request('cms/releases', 'GET', undefined, 403);
   await request('cms/password', 'POST', { password: 'short', confirmation: 'short' }, 400);
   await request('cms/password', 'POST', { password: 'New-synthetic-credential-123', confirmation: 'New-synthetic-credential-123' });
-  const list = await request('cms/releases'); assert.equal(list.data.items.length, 13);
+  const list = await request('cms/releases'); assert.equal(list.data.items.length, 18);
   let row = list.data.items.find(row => row.item.id === 1);
   await request('cms/releases/1', 'PUT', { item: { title: 'Edited Song' }, revision: row.revision }, 403, 'wrong');
   await request('cms/releases/1', 'PUT', { item: { place_id: 999 }, revision: row.revision }, 400);
