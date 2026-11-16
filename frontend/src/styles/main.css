@@ -328,10 +328,17 @@ a {
 }
 
 .mobile-nav-drawer.open {
-  max-height: 320px;
+  max-height: calc(100vh - var(--site-header-height, 96px) - var(--player-height) - env(safe-area-inset-bottom, 0px));
+  max-height: calc(100dvh - var(--site-header-height, 96px) - var(--player-height) - env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
   opacity: 1;
   padding: 16px 24px 24px 24px;
   pointer-events: auto;
+}
+
+.mobile-nav-drawer > * {
+  flex-shrink: 0;
 }
 
 .mobile-nav-link {

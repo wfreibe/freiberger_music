@@ -1,5 +1,5 @@
 import {PageNavigation} from './PageNavigation';
-import { useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { BookNavigation } from './BookNavigation';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { getCleanPath, navigate } from '../router';
@@ -9,6 +9,17 @@ export function HeaderNav() {
   const path = getCleanPath();
   const lang = currentLang.value;
   const [mobileOpen, setMobileOpen] = useState(false);
+  const header = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const element = header.current;
+    if (!element) return;
+    const updateHeight = () => element.style.setProperty('--site-header-height', `${element.getBoundingClientRect().height}px`);
+    updateHeight();
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
 
   const handleNav = (e: MouseEvent, target: string) => {
     e.preventDefault();
@@ -17,7 +28,7 @@ export function HeaderNav() {
   };
 
   return (
-    <header class="site-header">
+    <header ref={header} class="site-header">
       <a href="#/" onClick={(e) => handleNav(e, '/')} class="brand-logo">
         <span class="brand-title">FREIBERGER</span>
         <span class="brand-tagline">{t('brand_tagline')}</span>
